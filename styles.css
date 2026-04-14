@@ -1,0 +1,343 @@
+/* ============================================
+   Jiminy's Journal AR - Kingdom Hearts Theme
+   Kleurenpalet:
+   --jet-black: #1e2a3aff
+   --snow: #f5f0f0ff
+   --midnight-violet: #1a0b2eff
+   --metallic-gold: #d4af37ff
+   --gold: #ffd700ff
+   --electric-aqua: #00e5ffff
+   ============================================ */
+
+/* CSS Variabelen (Custom Properties) */
+:root {
+  --jet-black: #1e2a3aff;
+  --snow: #f5f0f0ff;
+  --midnight-violet: #1a0b2eff;
+  --metallic-gold: #d4af37ff;
+  --gold: #ffd700ff;
+  --electric-aqua: #00e5ffff;
+  
+  /* HSL varianten voor eventuele transparantie */
+  --jet-black-hsl: hsla(214, 32%, 17%, 1);
+  --snow-hsl: hsla(0, 20%, 95%, 1);
+  --midnight-violet-hsl: hsla(266, 61%, 11%, 1);
+  --metallic-gold-hsl: hsla(46, 65%, 52%, 1);
+  --gold-hsl: hsla(51, 100%, 50%, 1);
+  --electric-aqua-hsl: hsla(186, 100%, 50%, 1);
+  
+  /* Gradiënten */
+  --gradient-gold: linear-gradient(135deg, var(--metallic-gold), var(--gold));
+  --gradient-dark: linear-gradient(135deg, var(--jet-black), var(--midnight-violet));
+  --gradient-aqua: linear-gradient(135deg, var(--electric-aqua), var(--gold));
+  --gradient-snow: linear-gradient(135deg, var(--snow), var(--metallic-gold));
+  
+  /* Schaduwen */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.35);
+  --shadow-gold: 0 0 15px rgba(212, 175, 55, 0.4);
+  --shadow-aqua: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+/* Reset & Basis */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Courier New', 'Segoe UI', 'Georgia', 'Times New Roman', monospace;
+  background: var(--jet-black);
+}
+
+/* ============================================
+   STATUS MESSAGE BALK (bovenin)
+   ============================================ */
+#status-message {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  background: var(--midnight-violet);
+  color: var(--gold);
+  padding: 12px 20px;
+  border-radius: 40px;
+  font-size: 0.9rem;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  font-family: monospace;
+  pointer-events: none;
+  border-left: 4px solid var(--metallic-gold);
+  border-right: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  transition: all 0.3s ease;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 2px var(--gold));
+}
+
+.status-text {
+  flex: 1;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   INSTRUCTIE (onderin)
+   ============================================ */
+.instruction {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  text-align: center;
+  color: var(--snow);
+  background: rgba(26, 11, 46, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  font-size: 13px;
+  z-index: 100;
+  pointer-events: none;
+  border-radius: 30px;
+  border: 1px solid var(--metallic-gold);
+  font-family: monospace;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.instruction-icon {
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+
+/* ============================================
+   AR UI KNOBBEN (zwevend boven AR)
+   ============================================ */
+.ar-ui {
+  position: absolute;
+  bottom: 90px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  z-index: 100;
+  pointer-events: none;
+  padding: 0 16px;
+  flex-wrap: wrap;
+}
+
+.choice-btn {
+  pointer-events: auto;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.8px;
+  backdrop-filter: blur(4px);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.choice-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.choice-btn:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+/* Licht thema knop (Vriendschap) */
+.btn-light {
+  background: linear-gradient(135deg, var(--gold), var(--metallic-gold));
+  color: var(--midnight-violet);
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.btn-light:hover {
+  background: linear-gradient(135deg, var(--metallic-gold), var(--gold));
+  box-shadow: var(--shadow-gold);
+}
+
+/* Donker thema knop (Plicht) */
+.btn-dark {
+  background: linear-gradient(135deg, var(--jet-black), var(--midnight-violet));
+  color: var(--gold);
+  border: 1px solid var(--metallic-gold);
+}
+
+.btn-dark:hover {
+  background: linear-gradient(135deg, var(--midnight-violet), var(--jet-black));
+  box-shadow: var(--shadow-aqua);
+  border-color: var(--electric-aqua);
+  color: var(--electric-aqua);
+}
+
+/* ============================================
+   MARKER HELPER (rechtsonder)
+   ============================================ */
+.marker-helper {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(26, 11, 46, 0.9);
+  backdrop-filter: blur(8px);
+  padding: 10px 12px;
+  border-radius: 16px;
+  z-index: 100;
+  font-size: 10px;
+  color: var(--gold);
+  text-align: center;
+  border: 1px solid var(--metallic-gold);
+  font-family: monospace;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  max-width: 85px;
+}
+
+.marker-helper:hover {
+  background: var(--midnight-violet);
+  transform: scale(1.02);
+  border-color: var(--electric-aqua);
+}
+
+.marker-helper img {
+  border-radius: 10px;
+  margin-top: 6px;
+  border: 1px solid var(--metallic-gold);
+  width: 100%;
+  max-width: 65px;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.marker-helper-text {
+  font-size: 9px;
+  margin-top: 5px;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================
+   RESPONSIVE AANPASSINGEN
+   ============================================ */
+@media (max-width: 600px) {
+  .choice-btn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+  
+  .btn-light, .btn-dark {
+    min-width: 140px;
+  }
+  
+  .ar-ui {
+    bottom: 80px;
+    gap: 12px;
+  }
+  
+  #status-message {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+  
+  .instruction {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+  
+  .marker-helper {
+    bottom: 8px;
+    right: 8px;
+    padding: 6px 8px;
+    max-width: 70px;
+  }
+  
+  .marker-helper img {
+    max-width: 50px;
+  }
+}
+
+/* ============================================
+   ANIMATIES
+   ============================================ */
+@keyframes pulse-gold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(212, 175, 55, 0);
+  }
+}
+
+@keyframes glow-aqua {
+  0%, 100% {
+    border-color: var(--metallic-gold);
+  }
+  50% {
+    border-color: var(--electric-aqua);
+  }
+}
+
+.choice-btn:focus-visible {
+  outline: 2px solid var(--electric-aqua);
+  outline-offset: 2px;
+}
+
+/* Laadt animatie voor status */
+#status-message {
+  animation: pulse-gold 2s infinite;
+}
+
+.instruction {
+  animation: glow-aqua 3s infinite;
+}
+
+/* ============================================
+   SCROLLBAR (voor debugging, niet in AR nodig maar mooi)
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  background: var(--jet-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--metallic-gold);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}

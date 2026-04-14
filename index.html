@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Jiminy's Journal AR - Kingdom Hearts</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="status-message">
+    <span class="status-icon">🔍</span>
+    <span class="status-text">Zoek naar de Hiro marker...</span>
+  </div>
+  
+  <div class="instruction">
+    <span class="instruction-icon">📖</span>
+    Houd de HIRO marker (zie rechtsonder) voor je camera
+    <span class="instruction-icon">🎥</span>
+  </div>
+  
+  <div class="ar-ui" id="ar-ui" style="display: none;">
+    <button class="choice-btn btn-light" id="choice-light">
+      <span class="btn-icon">✨</span>
+      Vriendschap eerst
+    </button>
+    <button class="choice-btn btn-dark" id="choice-dark">
+      <span class="btn-icon">🌑</span>
+      Plicht boven alles
+    </button>
+  </div>
+
+  <!-- A-Frame en AR.js -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+  
+  <!-- A-Frame scene -->
+  <a-scene id="scene" embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+    
+    <!-- Hiro marker -->
+    <a-marker id="jiminy-marker" preset="hiro" emitevents="true">
+      
+      <!-- Jiminy's 3D lichaam -->
+      <a-entity position="0 0.4 0" rotation="0 180 0">
+        <!-- Lichaam -->
+        <a-sphere radius="0.25" color="#4CAF50" position="0 0.1 0"></a-sphere>
+        <!-- Hoofd -->
+        <a-sphere radius="0.18" color="#66BB6A" position="0 0.45 0"></a-sphere>
+        <!-- Ogen -->
+        <a-sphere radius="0.07" color="white" position="-0.08 0.52 0.16"></a-sphere>
+        <a-sphere radius="0.07" color="white" position="0.08 0.52 0.16"></a-sphere>
+        <a-sphere radius="0.04" color="black" position="-0.08 0.52 0.2"></a-sphere>
+        <a-sphere radius="0.04" color="black" position="0.08 0.52 0.2"></a-sphere>
+        <!-- Glimlach -->
+        <a-torus radius="0.08" radius-tubular="0.01" color="#2E7D32" rotation="90 0 0" position="0 0.42 0.18" arc="180"></a-torus>
+        <!-- Hoge hoed -->
+        <a-cylinder radius="0.13" height="0.2" color="#1A1A1A" position="0 0.62 0"></a-cylinder>
+        <a-cylinder radius="0.19" height="0.04" color="#2C2C2C" position="0 0.73 0"></a-cylinder>
+        <a-ring radius="0.14" radius-inner="0.12" color="#d4af37ff" position="0 0.62 0.01" rotation="-90 0 0"></a-ring>
+        <!-- Benen -->
+        <a-cylinder radius="0.05" height="0.2" color="#2E7D32" position="-0.1 -0.05 0"></a-cylinder>
+        <a-cylinder radius="0.05" height="0.2" color="#2E7D32" position="0.1 -0.05 0"></a-cylinder>
+        <!-- Paraplu -->
+        <a-cylinder radius="0.02" height="0.5" color="#8B4513" position="0.35 0.2 0.1" rotation="0 0 15"></a-cylinder>
+        <a-sphere radius="0.07" color="#FF5722" position="0.35 0.48 0.12"></a-sphere>
+        
+        <!-- Spraakballon -->
+        <a-entity id="speech-bubble" visible="false" position="0 0.85 0">
+          <a-plane width="0.9" height="0.5" color="#f5f0f0ff" opacity="0.95" position="0 0 0"></a-plane>
+          <a-text id="speech-text" value="..." color="#1e2a3aff" align="center" width="0.8" position="0 0 0" wrap-count="18"></a-text>
+        </a-entity>
+      </a-entity>
+      
+      <!-- Zwevend journal -->
+      <a-entity position="0.6 0.3 0" rotation="0 -20 10">
+        <a-box width="0.5" height="0.35" depth="0.08" color="#1a0b2eff" position="0 0 0"></a-box>
+        <a-box width="0.48" height="0.33" depth="0.06" color="#f5f0f0ff" position="0 0 0.03"></a-box>
+        <a-text value="Jiminy's Journal" color="#d4af37ff" align="center" width="0.45" position="0 0 0.08" scale="0.5 0.5 0.5"></a-text>
+        <a-torus radius="0.08" radius-tubular="0.01" color="#ffd700ff" position="0 -0.1 0.08" rotation="45 0 0"></a-torus>
+      </a-entity>
+      
+    </a-marker>
+    
+    <a-entity camera></a-entity>
+  </a-scene>
+  
+  <script>
+    // Morele dilemma content
+    const dilemma = {
+      title: "Het dilemma van de duisternis",
+      story: "Sora staat voor een keuze: redt hij Riku die gevallen is in duisternis, of beschermt hij de wereld van het licht? Jiminy kijkt toe... Wat moet Sora doen?",
+      options: {
+        light: {
+          text: "✨ Vriendschap eerst",
+          response: "Jiminy knikt wijs: 'Je kiest voor vriendschap. Sora's hart is sterker dan duisternis. Onthoud: echte vrienden redden elkaar, altijd.' 🌟 Het journal gloeit warm op.",
+          lesson: "Vriendschap overwint alles - Kingdom Hearts I"
+        },
+        dark: {
+          text: "🌑 Plicht boven alles",
+          response: "Jiminy zucht: 'Plicht is zwaar... maar Sora zou nooit een vriend achterlaten. Misschien is de ware plicht trouw blijven aan je hart.' 💔 Het journal wordt even grauw.",
+          lesson: "Soms is de zwaarste plicht volgen wat je hart voelt - Kingdom Hearts Chain of Memories"
+        }
+      }
+    };
+    
+    // DOM elementen
+    const statusDiv = document.getElementById('status-message');
+    const arUI = document.getElementById('ar-ui');
+    const choiceLight = document.getElementById('choice-light');
+    const choiceDark = document.getElementById('choice-dark');
+    const scene = document.getElementById('scene');
+    
+    let markerVisible = false;
+    let speechBubble = null;
+    let speechText = null;
+    let currentTimeout = null;
+    
+    scene.addEventListener('loaded', () => {
+      console.log("AR Scene geladen");
+      statusDiv.innerHTML = '<span class="status-icon">✅</span><span class="status-text">Camera actief. Zoek de HIRO marker →</span>';
+      
+      setTimeout(() => {
+        const marker = document.getElementById('jiminy-marker');
+        if(marker) {
+          speechBubble = marker.querySelector('#speech-bubble');
+          speechText = marker.querySelector('#speech-text');
+        }
+      }, 500);
+    });
+    
+    const markerEl = document.getElementById('jiminy-marker');
+    if(markerEl) {
+      markerEl.addEventListener('markerFound', () => {
+        console.log("Marker gevonden! Jiminy verschijnt.");
+        markerVisible = true;
+        statusDiv.innerHTML = '<span class="status-icon">🎩</span><span class="status-text">Jiminy verschijnt! Klik op een keuze →</span>';
+        arUI.style.display = "flex";
+        
+        showSpeechBubble("Welkom in mijn journal, reiziger! Een morele keuze wacht op je...");
+        
+        const body = markerEl.querySelector('a-sphere');
+        if(body) {
+          body.setAttribute('animation', 'property: position; to: 0 0.15 0; dur: 500; dir: alternate; loop: true');
+        }
+      });
+      
+      markerEl.addEventListener('markerLost', () => {
+        console.log("Marker verloren");
+        markerVisible = false;
+        statusDiv.innerHTML = '<span class="status-icon">🔍</span><span class="status-text">Marker kwijt. Houd de HIRO marker opnieuw in beeld.</span>';
+        arUI.style.display = "none";
+        if(speechBubble) speechBubble.setAttribute('visible', 'false');
+        if(currentTimeout) clearTimeout(currentTimeout);
+        
+        const body = markerEl.querySelector('a-sphere');
+        if(body) body.removeAttribute('animation');
+      });
+    }
+    
+    function showSpeechBubble(message, duration = 4000) {
+      if(!speechBubble || !speechText) return;
+      speechText.setAttribute('value', message);
+      speechBubble.setAttribute('visible', 'true');
+      if(currentTimeout) clearTimeout(currentTimeout);
+      currentTimeout = setTimeout(() => {
+        if(speechBubble) speechBubble.setAttribute('visible', 'false');
+      }, duration);
+    }
+    
+    function handleChoice(choice) {
+      if(!markerVisible) {
+        showSpeechBubble("Ik zie je marker niet! Houd het journal voor de camera.", 2000);
+        return;
+      }
+      
+      const option = dilemma.options[choice];
+      if(!option) return;
+      
+      showSpeechBubble(option.response, 6000);
+      
+      const journal = document.querySelector('#jiminy-marker a-entity:last-child');
+      if(journal) {
+        const journalBox = journal.querySelector('a-box');
+        if(journalBox) {
+          const originalColor = journalBox.getAttribute('color');
+          const glowColor = (choice === 'light') ? '#ffd700ff' : '#1e2a3aff';
+          journalBox.setAttribute('color', glowColor);
+          setTimeout(() => {
+            journalBox.setAttribute('color', originalColor);
+          }, 800);
+        }
+      }
+      
+      statusDiv.innerHTML = (choice === 'light') 
+        ? '<span class="status-icon">💖</span><span class="status-text">Vriendschap gekozen! + Hartpunten</span>'
+        : '<span class="status-icon">🌙</span><span class="status-text">Plicht gekozen... Het journal mijmert.</span>';
+      
+      setTimeout(() => {
+        statusDiv.innerHTML = '<span class="status-icon">🎩</span><span class="status-text">Jiminy\'s Journal - maak een keuze</span>';
+      }, 3000);
+      
+      console.log(`Jiminy's les: ${option.lesson}`);
+    }
+    
+    choiceLight.addEventListener('click', () => handleChoice('light'));
+    choiceDark.addEventListener('click', () => handleChoice('dark'));
+    
+    if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      const instr = document.querySelector('.instruction');
+      if(instr) instr.innerHTML = '<span class="instruction-icon">📱</span> Tik op het scherm om de camera toe te staan. Houd de HIRO marker in beeld. Zorg voor goed licht! <span class="instruction-icon">💡</span>';
+    }
+  </script>
+</body>
+</html>
