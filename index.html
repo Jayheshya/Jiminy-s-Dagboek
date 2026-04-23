@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jiminy's Dagboek — Het Morele Register</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="stijl.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jiminy's Dagboek — Het Morele Register</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stijl.css">
 </head>
 <body>
 
 <!-- Sterrenveld -->
-<div class="stars" id="stars"></div>
+<div class="stars" id="stars" aria-hidden="true"></div>
 
 <!-- Header -->
 <header>
@@ -19,24 +19,22 @@
   <h1>Jiminy's Dagboek<em>Het Morele Register</em></h1>
   <div class="header-rule"></div>
   <p class="header-intro">
-    Elke stap die Sora zet, elk hart dat flikkert tussen licht en schaduw —
-    Jiminy Cricket is er getuige van. Dit is zijn boekhouding van de ziel.
+    Een klein krekeltje met een paraplu.
+    Ik heb gezien hoe harten breken en weer heel worden.
+    Dit is mijn dagboek. Niet de officiële geschiedenis. Dit is wat mijn geweten heeft vastgelegd.
   </p>
 </header>
 
 <!-- Jiminy figuur -->
 <div class="jiminy-quote">
-  <div class="jiminy-figure">🦗</div>
-  <div class="jiminy-speech">
-    "Laat je geweten altijd je gids zijn."
-    <br>— <em>en zo leg ik vast wat het geweten zag</em>
-  </div>
+<img class="jiminy-figure" src="assets/jiminyumbrella.png" alt="Jiminy Cricket" aria-hidden="true">
+  <p class="jiminy-speech">"Laat je geweten altijd je gids zijn"</p>
 </div>
 
 <!-- Filters -->
-<div class="filter-section">
-  <div class="filter-label">Filter op moreel thema</div>
-  <div class="filters">
+<nav class="filter-section" aria-label="Filter op moreel thema">
+  <div class="filter-label" id="filter-label">Filter op moreel thema</div>
+  <div class="filters" role="group" aria-labelledby="filter-label">
     <button class="filter-btn active" data-filter="all">Alle aantekeningen</button>
     <button class="filter-btn" data-filter="sacrifice">Opoffering</button>
     <button class="filter-btn" data-filter="identity">Identiteit</button>
@@ -46,397 +44,426 @@
     <button class="filter-btn" data-filter="friendship">Vriendschap</button>
     <button class="filter-btn" data-filter="memory">Herinnering</button>
   </div>
-</div>
+</nav>
 
 <!-- Tijdlijn -->
-<div class="timeline-container">
-  <div class="entry-count" id="entryCount">— 9 aantekeningen vastgelegd —</div>
+<main class="timeline-container">
+  <div class="entry-count" id="entryCount" aria-live="polite"></div>
 
-  <!-- ═══ GAME I ═══ -->
-  <div class="game-chapter">
+  <!-- ═══ KINGDOM HEARTS (2002) ═══ -->
+  <section class="game-chapter" aria-label="Kingdom Hearts">
     <div class="game-title">
-      <div class="game-icon">I</div>
-      <div>
-        <div class="game-name">Kingdom Hearts</div>
-      </div>
-      <div class="game-year">2002</div>
+      <div class="game-icon" aria-hidden="true">I</div>
+      <span class="game-name">Kingdom Hearts I</span>
+      <span class="game-year">2002</span>
     </div>
 
-    <div class="entry" data-tags="sacrifice,friendship,choice">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="sacrifice,friendship,choice">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-sacrifice">Opoffering</span>
             <span class="tag tag-friendship">Vriendschap</span>
           </div>
           <div class="entry-title">Sora verbrijzelt zijn eigen hart</div>
-          <div class="entry-subtitle">Einde van Hollow Bastion — Sora gebruikt de Keyblade der Harten</div>
+          <div class="entry-subtitle">Hollow Bastion: Sora gebruikt de Keyblade of Hearts</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
+          <blockquote class="journal-text">
             Hij deed het zonder aarzelen. Dreef het zwaard in zijn eigen borst
-            om de harten binnenin te bevrijden — inclusief dat van Kairi.
-            Ik kon hem niet tegenhouden, en misschien had ik dat ook niet moeten proberen.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            De daad is een diepgaande omkering van het doel van de Keyblade: een instrument van verovering
+            om de harten binnenin te bevrijden, inclusief dat van Kairi.
+            Ik kon hem niet tegenhouden, misschien had ik dat ook niet moeten proberen.
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            De daad is een diepgaande omkering van het doel van de Keyblade. Het instrument van verovering
             dat tegen zijn eigen drager wordt gekeerd voor de bevrijding van anderen. Sora ruilt bewust
             zijn bestaan in voor het hart van Kairi, een keuze gedreven door liefde en niet door plicht.
-            Er is geen aarzeling — wat op zichzelf al een morele uitspraak is. Wanneer geweten en gevoel
+            Er is geen aarzeling, wat op zichzelf al een morele uitspraak is. Wanneer geweten en gevoel
             perfect samenvallen, wordt overleg overbodig.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 95%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 95">
+              <div class="weight-bar-fill" style="--weight: 95%"></div>
+            </div>
             <span class="weight-value">95</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="entry" data-tags="darkness,choice,identity">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="darkness,choice,identity">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-darkness">Duisternis</span>
             <span class="tag tag-choice">Keuze</span>
           </div>
           <div class="entry-title">Riku opent de deur naar duisternis</div>
-          <div class="entry-subtitle">Takemeer-eilanden — de nacht dat de wereld eindigt</div>
+          <div class="entry-subtitle">Takemeer-eilanden: de nacht dat de wereld eindigt</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
-            Hij wilde macht — de wereld voorbij willen zien. Maar willen en kiezen
+          <blockquote class="journal-text">
+            Hij wilde macht en de wereld voorbij zien. Maar willen en kiezen
             zijn verschillende dingen. Toen Riku die deur opende, overschreed hij een grens
             die geen enkele wens ongedaan kan maken.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            Riku's val is geen plotselinge corrruptie maar het gevolg van jarenlang gekoesterde afgunst
-            en rusteloosheid. Hij gelooft oprecht dat zijn motieven edel zijn — beschermen wie hij liefheeft,
-            sterk genoeg worden om ertoe te doen. Kingdom Hearts stelt ons de vraag: is een daad slecht
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            Riku's val is geen plotselinge corruptie, maar het gevolg van jarenlang gekoesterde afgunst
+            en rusteloosheid. Hij gelooft oprecht dat hij beschermt wie hij liefheeft door
+            sterk genoeg te worden om ertoe te doen. Kingdom Hearts stelt ons de vraag: is een daad slecht
             als de intentie liefde is? Riku's verhaal suggereert dat intentie de gevolgen niet vergoelijkt.
             De weg die gekozen wordt vormt de reiziger, ongeacht de bestemming die men voor ogen had.
-          </div>
+          </p>
           <div class="moral-weight">
-            <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 82%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 82">
+              <div class="weight-bar-fill" style="--weight: 82%"></div>
+            </div>
             <span class="weight-value">82</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="entry" data-tags="sacrifice,darkness">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="sacrifice,darkness">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-sacrifice">Opoffering</span>
             <span class="tag tag-darkness">Duisternis</span>
           </div>
           <div class="entry-title">Ansem, Zoeker van Duisternis, wordt verzegeld</div>
-          <div class="entry-subtitle">Het Einde der Wereld — de laatste deur</div>
+          <div class="entry-subtitle">Het Einde van de Wereld: de laatste deur</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
+          <blockquote class="journal-text">
             Riku hield de deur van binnenuit vast zodat Sora en de Koning hem konden verzegelen.
             Ik zag hoe Sora zijn hand uitstak, maar hem niet kon redden. De deur sloot zich.
-            Duisternis verzwolg hen beiden — en toch was het een daad van licht.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
+            Duisternis verzwolg hen beiden en toch was het een daad van licht.
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
             Het sluiten van de Deur naar Duisternis is een studie in verlossing door daad.
             Riku, wiens hele verhaal gekenmerkt werd door overgave aan het duister, verricht
             de zuiverste handeling van het verhaal: achterblijven zodat anderen kunnen leven.
-            Mickey's aanwezigheid versterkt het thema — zelfs in het diepste duister blijven
+            Mickey's aanwezigheid versterkt het thema zelfs in het diepste duister blijven
             kleine lichtjes branden. Opoffering heeft geen publiek nodig.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 90%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 90">
+              <div class="weight-bar-fill" style="--weight: 90%"></div>
+            </div>
             <span class="weight-value">90</span>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══ GAME II: CoM ═══ -->
-  <div class="game-chapter">
+  <!-- ═══ CHAIN OF MEMORIES (2004) ═══ -->
+  <section class="game-chapter" aria-label="Chain of Memories">
     <div class="game-title">
-      <div class="game-icon">🃏</div>
-      <div>
-        <div class="game-name">Chain of Memories</div>
-      </div>
-      <div class="game-year">2004</div>
+      <div class="game-icon" aria-hidden="true">🃏</div>
+      <span class="game-name">Chain of Memories</span>
+      <span class="game-year">2004</span>
     </div>
 
-    <div class="entry" data-tags="memory,identity,betrayal">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="memory,identity,betrayal">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-memory">Herinnering</span>
             <span class="tag tag-betrayal">Verraad</span>
           </div>
           <div class="entry-title">Naminé herschrijft Sora's herinneringen</div>
-          <div class="entry-subtitle">Kasteel Oblivion — het gefabriceerde verleden</div>
+          <div class="entry-subtitle">Kasteel Oblivion: het gefabriceerde verleden</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
-            Mijn eigen dagboek — leeg. Pagina's die ik had gevuld, nu blanco.
+          <blockquote class="journal-text">
+            Mijn eigen dagboek is leeg. Pagina's die ik had gevuld, nu blanco.
             Ze had niet alleen zijn herinneringen meegenomen, maar ook de mijne.
             Een gewiste geschiedenis is een geschiedenis die nooit heeft bestaan.
             Of toch wel?
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
             Naminé's manipulatie stelt de donkerste vraag in Kingdom Hearts:
             als herinneringen het zelf definiëren, wat blijft er over wanneer ze worden vervalst?
-            Sora's liefde voor Naminé voelt voor hem echt aan — en is daarmee, in de enige zin
-            die telt voor degene die het ervaart, ook echt. De morele last ligt niet bij Sora,
-            maar bij degenen die zijn vermogen tot vertrouwen als wapen gebruikten.
-            Naminé koos hier zelf niet voor — wat schuld compliceert zonder haar te wissen.
-          </div>
+            Sora's liefde voor Naminé voelt voor hem echt aan en is daarmee ook echt. De morele last
+            ligt niet bij Sora, maar bij degenen die zijn vermogen tot vertrouwen als wapen gebruikten.
+            Naminé koos hier zelf niet voor, wat schuld compliceert zonder haar te wissen.
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 88%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 88">
+              <div class="weight-bar-fill" style="--weight: 88%"></div>
+            </div>
             <span class="weight-value">88</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="entry" data-tags="sacrifice,identity,memory">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="sacrifice,identity,memory">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-sacrifice">Opoffering</span>
             <span class="tag tag-memory">Herinnering</span>
           </div>
-          <div class="entry-title">Sora kiest voor de slaap — om te vergeten</div>
-          <div class="entry-subtitle">Kasteel Oblivion — de vrijwillige overgave van het zelf</div>
+          <div class="entry-title">Sora kiest voor de slaap om te vergeten</div>
+          <div class="entry-subtitle">Kasteel Oblivion: de vrijwillige overgave van het zelf</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
+          <blockquote class="journal-text">
             Hij stemde ermee in. Wetende dat hij dit zou verliezen, mij zou verliezen,
-            alles wat hij zojuist had doorleefd — hij stemde ermee in, omdat het de enige
+            alles wat hij zojuist had doorleefd. Hij stemde ermee in, omdat het de enige
             manier was om terug te halen wat vroeger was afgenomen. Ik vind dat
             buitengewoon moedig. Of buitengewoon dwaas. Misschien allebei.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            Vrijwillig afstand doen van herinneringen — en daarmee van identiteit — om een
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            Vrijwillig afstand doen van herinneringen en daarmee van identiteit om een
             eerdere versie van zichzelf te herstellen is een filosofisch paradox in het hart van
             Chain of Memories. Welke Sora verdient het te bestaan: degene die groeide door
             Kasteel Oblivion, of degene wiens oorspronkelijke banden worden hersteld?
             Sora's keuze impliceert dat gekozen relaties zwaarder wegen dan opgedane ervaringen.
             Dat wie we liefhebben meer telt dan wat we hebben doorstaan.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 78%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 78">
+              <div class="weight-bar-fill" style="--weight: 78%"></div>
+            </div>
             <span class="weight-value">78</span>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </article>
+  </section>
 
-  <!-- ═══ GAME III: KH2 ═══ -->
-  <div class="game-chapter">
+  <!-- ═══ KINGDOM HEARTS II (2005) ═══ -->
+  <section class="game-chapter" aria-label="Kingdom Hearts II">
     <div class="game-title">
-      <div class="game-icon">II</div>
-      <div>
-        <div class="game-name">Kingdom Hearts II</div>
-      </div>
-      <div class="game-year">2005</div>
+      <div class="game-icon" aria-hidden="true">II</div>
+      <span class="game-name">Kingdom Hearts II</span>
+      <span class="game-year">2005</span>
     </div>
 
-    <div class="entry" data-tags="identity,sacrifice,memory">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="identity,sacrifice,memory">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-identity">Identiteit</span>
             <span class="tag tag-sacrifice">Opoffering</span>
           </div>
           <div class="entry-title">Roxas houdt op te bestaan</div>
-          <div class="entry-subtitle">Schemerdorp — de laatste dag van de Niemand</div>
+          <div class="entry-subtitle">Schemerdorp: de laatste dag van een Nobody</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
-            Hij had een naam. Vrienden. Een zomer. Een leven dat geen leugen was,
-            ook al was het op een leugen gebouwd. En toen was het voorbij —
-            niet omdat hij de verkeerde keuze maakte, maar omdat Sora moest ontwaken.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            Roxas is de moreel meest ongemakkelijke figuur in de reeks, juist omdat hij
+          <blockquote class="journal-text">
+            Hij had een naam. Vrienden. Eén zomer. Een leven dat geen leugen was,
+            ook al was het op een leugen gebouwd. En toen was het voorbij.
+            Niet omdat hij de verkeerde keuze maakte, maar omdat Sora moest ontwaken.
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            Roxas is de moreel meest ongemakkelijke figuur in ons verhaal, juist omdat hij
             onschuldig is. Hij vroeg er niet om geboren te worden, hij vroeg er niet om uitgewist te worden.
-            Zijn ontbinding stelt een vraag die de game nooit volledig beantwoordt:
-            heeft een gecreëerd persoon gelijke rechten als een organisch persoon?
-            Roxas' zelfloze aanvaarding — "Ik ben Sora's Niemand. Ik moet gaan." —
+            Zijn ontbinding stelt een vraag die we nooit zouden kunnen beantwoorden:
+            heeft een gecreëerd persoon gelijke rechten als een "echt" persoon?
+            Roxas' zelfloze aanvaarding "Ik ben Sora's Nobody. Ik moet gaan."
             is ofwel diepgaand volwassen, ofwel het resultaat van een identiteit die zo volledig
             gekoloniseerd is door zijn oorsprong dat verzet hem nooit werkelijk ter beschikking stond.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 93%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="93" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 93">
+              <div class="weight-bar-fill" style="--weight: 93%"></div>
+            </div>
             <span class="weight-value">93</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="entry" data-tags="betrayal,darkness,identity">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="betrayal,darkness,identity">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-betrayal">Verraad</span>
             <span class="tag tag-darkness">Duisternis</span>
           </div>
           <div class="entry-title">Xehanort's lange spel onthuld</div>
-          <div class="entry-subtitle">De Wereld die Nooit Was — Xemnas ontmaskerd</div>
+          <div class="entry-subtitle">De Wereld die Nooit Was: Xemnas ontmaskerd</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
-            Elk conflict, elke schaduw — draden getrokken door dezelfde hand.
+          <blockquote class="journal-text">
+            Elk conflict, elke schaduw. Alle draden getrokken door dezelfde hand.
             Xehanort. Een man die menselijke harten als instrumenten behandelde
             en het wetenschap noemde. Het lot noemde. Ik noem het iets anders.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            Xehanort belichaamt het gevaar van de ideoloog — iemand die zo zeker is van
-            zijn theorie over het universum dat individuele levens aanvaardbaar bijkomende schade worden.
-            Zijn experimenten op Ventus, Terra en Aqua, zijn orkestratie van de Keyblade-oorlog —
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            Xehanort personificeert het gevaar van de ideoloog. Iemand die zo zeker is van
+            zijn theorie over het universum dat individuele levens aanvaardbare bijkomende schade worden.
+            Zijn experimenten op Ventus, Terra en Aqua, zijn orkestratie van de Keyblade-oorlog
             dit zijn geen daden van kwaad omwille van het kwaad, maar van absolute overtuiging.
             Kingdom Hearts betoogt consequent dat zekerheid zonder empathie de ware vorm van duisternis is.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 97%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="97" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 97">
+              <div class="weight-bar-fill" style="--weight: 97%"></div>
+            </div>
             <span class="weight-value">97</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="entry" data-tags="friendship,choice,sacrifice">
-      <div class="entry-connector"></div>
-      <div class="entry-header" onclick="toggleEntry(this)">
-        <div class="entry-dot"></div>
+    <article class="entry" data-tags="friendship,choice,sacrifice">
+      <div class="entry-connector" aria-hidden="true"></div>
+      <button class="entry-header" aria-expanded="false">
+        <div class="entry-dot" aria-hidden="true"></div>
         <div class="entry-meta">
-          <div class="entry-tags">
+          <div class="entry-tags" aria-label="Thema's:">
             <span class="tag tag-friendship">Vriendschap</span>
             <span class="tag tag-choice">Keuze</span>
           </div>
-          <div class="entry-title">Sora vertrouwt Riku opnieuw — zonder bewijs</div>
-          <div class="entry-subtitle">De Wereld die Nooit Was — weerzien in het duister</div>
+          <div class="entry-title">Sora vertrouwt Riku opnieuw zonder bewijs</div>
+          <div class="entry-subtitle">De Wereld die Nooit Was: terugblikken in het duister</div>
         </div>
-        <div class="entry-arrow">▾</div>
-      </div>
-      <div class="entry-body">
+        <div class="entry-arrow" aria-hidden="true">▾</div>
+      </button>
+      <div class="entry-body" hidden>
         <div class="entry-content">
-          <div class="journal-text">
+          <blockquote class="journal-text">
             Hij herkende Riku, zelfs in het gezicht van Ansem.
             Niet met zijn ogen. Met zijn hart. Ik heb nog nooit iets meegemaakt
             dat tegelijk zo eenvoudig en zo moeilijk was.
-          </div>
-          <div class="analysis-label">Jiminy's morele analyse</div>
-          <div class="analysis-text">
-            Sora's herkenning van Riku — gehuld in Ansem's gedaante, op de plek van
-            uiterste duisternis — is de culminatie van de centrale morele stelling in de reeks:
-            dat het hart ziet wat de ogen niet kunnen zien. Het is een pleidooi voor
+          </blockquote>
+          <p class="analysis-label">Jiminy's morele analyse</p>
+          <p class="analysis-text">
+            Sora's herkenning van Riku gehuld in Ansem's gedaante, op de plek van
+            uiterste duisternis is de culminatie van de centrale morele stelling in ons verhaal.
+            Het hart ziet wat de ogen niet kunnen zien. Het is een pleidooi voor
             vertrouwen als morele daad op zich, los van bewijs.
             In een verhaal vol manipulatie, valse schijn en gefabriceerde identiteiten
             wordt de keuze om in iemand te geloven neergezet als de hoogste uiting van licht.
-          </div>
+          </p>
           <div class="moral-weight">
             <span class="weight-label">Moreel gewicht</span>
-            <div class="weight-bar-bg"><div class="weight-bar-fill" style="--weight: 72%"></div></div>
+            <div class="weight-bar-bg" role="progressbar" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100" aria-label="Moreel gewicht: 72">
+              <div class="weight-bar-fill" style="--weight: 72%"></div>
+            </div>
             <span class="weight-value">72</span>
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-  </div><!-- einde game-hoofdstuk -->
+  </section>
 
-</div><!-- einde tijdlijn -->
+</main>
 
-<div class="scroll-bottom">· · ✦ · ·</div>
+<div class="scroll-bottom" aria-hidden="true">· · ✦ · ·</div>
 
 <footer>
   <p class="footer-text">
     "Zelfs de kleinste persoon kan de loop van de toekomst veranderen."<br>
-    <em>— Jiminy Cricket, zak-historicus, moreel getuige</em>
+    — Jiminy Cricket, zak-historicus, moreel getuige
   </p>
 </footer>
 
 <script>
   // ─── STERRENVELD ───
   const starsEl = document.getElementById('stars');
-  for (let i = 0; i < 160; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const size = Math.random() * 2 + 0.5;
-    const minOp = (Math.random() * 0.15 + 0.03).toFixed(2);
-    const maxOp = (Math.random() * 0.6 + 0.2).toFixed(2);
-    s.style.cssText = `
-      left: ${Math.random()*100}%;
-      top: ${Math.random()*100}%;
-      width: ${size}px;
-      height: ${size}px;
-      --d: ${(Math.random()*4+2).toFixed(1)}s;
-      --delay: ${(Math.random()*6).toFixed(1)}s;
-      --min: ${minOp};
-      --max: ${maxOp};
-    `;
-    starsEl.appendChild(s);
-  }
+  const fragment = document.createDocumentFragment();
 
-  // ─── AANTEKENING UITKLAPPEN ───
-  function toggleEntry(header) {
-    const entry = header.parentElement;
-    const isOpen = entry.classList.contains('open');
-    document.querySelectorAll('.entry.open').forEach(e => e.classList.remove('open'));
-    if (!isOpen) entry.classList.add('open');
+  for (let i = 0; i < 160; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    star.style.cssText = [
+      `left: ${Math.random() * 100}%`,
+      `top: ${Math.random() * 100}%`,
+      `width: ${size}px`,
+      `height: ${size}px`,
+      `--d: ${(Math.random() * 4 + 2).toFixed(1)}s`,
+      `--delay: ${(Math.random() * 6).toFixed(1)}s`,
+      `--min: ${(Math.random() * 0.15 + 0.03).toFixed(2)}`,
+      `--max: ${(Math.random() * 0.6 + 0.2).toFixed(2)}`,
+    ].join(';');
+    fragment.appendChild(star);
   }
+  starsEl.appendChild(fragment);
+
+  // ─── TELLER: automatisch tellen bij laden ───
+  const allEntries = document.querySelectorAll('.entry');
+  document.getElementById('entryCount').textContent =
+    `— ${allEntries.length} aantekeningen vastgelegd —`;
+
+  // ─── ACCORDION ───
+  document.querySelectorAll('.entry-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const entry = header.closest('.entry');
+      const body  = entry.querySelector('.entry-body');
+      const isOpen = entry.classList.contains('open');
+
+      // Sluit alle andere open entries
+      document.querySelectorAll('.entry.open').forEach(openEntry => {
+        openEntry.classList.remove('open');
+        openEntry.querySelector('.entry-header').setAttribute('aria-expanded', 'false');
+        openEntry.querySelector('.entry-body').hidden = true;
+      });
+
+      // Zet de geklikte entry aan of uit
+      if (!isOpen) {
+        entry.classList.add('open');
+        header.setAttribute('aria-expanded', 'true');
+        body.hidden = false;
+      }
+    });
+  });
 
   // ─── SCROLL REVEAL ───
   const observer = new IntersectionObserver((entries) => {
@@ -448,35 +475,44 @@
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
 
-  document.querySelectorAll('.entry').forEach(e => observer.observe(e));
+  allEntries.forEach(e => observer.observe(e));
 
   // ─── FILTERS ───
+  const themaLabels = {
+    sacrifice:  'opoffering',
+    identity:   'identiteit',
+    betrayal:   'verraad',
+    choice:     'keuze',
+    darkness:   'duisternis',
+    friendship: 'vriendschap',
+    memory:     'herinnering',
+  };
+
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
       const filter = btn.dataset.filter;
-      const entries = document.querySelectorAll('.entry');
       let count = 0;
 
-      entries.forEach(entry => {
-        const tags = (entry.dataset.tags || '').split(',');
+      allEntries.forEach(entry => {
+        const tags = entry.dataset.tags.split(',');
         const show = filter === 'all' || tags.includes(filter);
-        entry.style.display = show ? '' : 'none';
-        if (show) count++;
-        if (!show) entry.classList.remove('open');
+        entry.hidden = !show;
+        if (show) {
+          count++;
+        } else {
+          // Sluit verborgen entries netjes af
+          entry.classList.remove('open');
+          entry.querySelector('.entry-header').setAttribute('aria-expanded', 'false');
+          entry.querySelector('.entry-body').hidden = true;
+        }
       });
 
-      const themaLabels = {
-        sacrifice: 'opoffering', identity: 'identiteit', betrayal: 'verraad',
-        choice: 'keuze', darkness: 'duisternis', friendship: 'vriendschap', memory: 'herinnering'
-      };
-
-      document.getElementById('entryCount').textContent =
-        filter === 'all'
-          ? `— ${count} aantekeningen vastgelegd —`
-          : `— ${count} aantekening${count === 1 ? '' : 'en'} over thema: ${themaLabels[filter] || filter} —`;
+      document.getElementById('entryCount').textContent = filter === 'all'
+        ? `— ${count} aantekeningen vastgelegd —`
+        : `— ${count} aantekening${count === 1 ? '' : 'en'} over thema: ${themaLabels[filter]} —`;
     });
   });
 </script>
