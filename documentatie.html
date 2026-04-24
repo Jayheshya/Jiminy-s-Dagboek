@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tussenrapport — Jiminy's Dagboek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stijl.css">
+  <style>
+
+    /* ─── PAGINANAVIGATIE ─── */
+    .site-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+      padding: 12px 20px;
+      background: rgba(10, 12, 20, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(200, 151, 58, 0.15);
+    }
+
+    .nav-link {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(200, 212, 240, 0.5);
+      text-decoration: none;
+      padding: 7px 20px;
+      border: 1px solid transparent;
+      border-radius: 1px;
+      transition: all 0.25s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--gold);
+      border-color: rgba(200, 151, 58, 0.2);
+    }
+
+    .nav-link.actief {
+      color: var(--gold);
+      border-color: rgba(200, 151, 58, 0.4);
+      background: rgba(200, 151, 58, 0.07);
+    }
+
+    /* ─── DOCUMENTATIE LAYOUT ─── */
+    .doc-container {
+      position: relative;
+      z-index: 10;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 120px 24px 100px;
+    }
+
+    /* ─── DOC HEADER ─── */
+    .doc-header {
+      text-align: center;
+      margin-bottom: 70px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .doc-header-deco {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .doc-header h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      text-shadow:
+        0 0 60px rgba(var(--gold-rgb), 0.3),
+        0 0 120px rgba(var(--gold-rgb), 0.1);
+    }
+
+    .doc-header .header-rule {
+      margin: 24px auto;
+    }
+
+    .doc-header p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: rgba(200, 212, 240, 0.6);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ─── SECTIES ─── */
+    .doc-section {
+      margin-bottom: 64px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .doc-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .doc-section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 6px;
+    }
+
+    .doc-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 600;
+      color: var(--parchment);
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(var(--gold-rgb), 0.2);
+    }
+
+    .doc-section h3 {
+      font-family: 'IM Fell English', serif;
+      font-size: 22px;
+      color: var(--gold);
+      margin: 32px 0 12px;
+    }
+
+    .doc-section p {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.8;
+      color: rgba(200, 212, 240, 0.75);
+      margin-bottom: 14px;
+    }
+
+    .doc-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 20px;
+    }
+
+    .doc-section ul li {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(200, 212, 240, 0.7);
+      padding: 5px 0 5px 22px;
+      position: relative;
+    }
+
+    .doc-section ul li::before {
+      content: '·';
+      position: absolute;
+      left: 6px;
+      color: var(--gold);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    /* ─── KLEURPALET ─── */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .color-swatch {
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .swatch-color {
+      height: 72px;
+      width: 100%;
+    }
+
+    .swatch-info {
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .swatch-name {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--parchment);
+      margin-bottom: 4px;
+    }
+
+    .swatch-hex {
+      font-family: 'Crimson Pro', monospace;
+      font-size: 13px;
+      color: var(--gold-dim);
+    }
+
+    .swatch-role {
+      font-family: 'Crimson Pro', serif;
+      font-style: italic;
+      font-size: 12px;
+      color: rgba(200, 212, 240, 0.4);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    /* ─── TYPOGRAFIE DEMO ─── */
+    .type-block {
+      border: 1px solid rgba(var(--gold-rgb), 0.15);
+      border-radius: 2px;
+      padding: 24px 28px;
+      margin: 16px 0;
+      background: rgba(255, 255, 255, 0.02);
+      position: relative;
+    }
+
+    .type-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 10px;
+    }
+
+    .type-cinzel    { font-family: 'Cinzel', serif; font-size: 28px; color: var(--parchment); letter-spacing: 2px; }
+    .type-fell      { font-family: 'IM Fell English', serif; font-style: italic; font-size: 24px; color: var(--parchment-shadow); line-height: 1.5; }
+    .type-crimson   { font-family: 'Crimson Pro', Georgia, serif; font-size: 18px; color: rgba(200, 212, 240, 0.75); line-height: 1.7; }
+
+    /* ─── DOELGROEP TABEL ─── */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+    }
+
+    .doc-table th {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(var(--gold-rgb), 0.3);
+      background: rgba(var(--gold-rgb), 0.05);
+    }
+
+    .doc-table td {
+      padding: 12px 16px;
+      color: rgba(200, 212, 240, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    .doc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .doc-table td:first-child {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--parchment);
+      white-space: nowrap;
+    }
+
+    /* ─── GECITEERD BLOK ─── */
+    .doc-quote {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 20px;
+      line-height: 1.7;
+      color: var(--parchment-shadow);
+      padding: 20px 24px;
+      background: rgba(var(--gold-rgb), 0.05);
+      border: 1px solid rgba(var(--gold-rgb), 0.12);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 2px 2px 0;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    /* ─── AR CONCEPT HIGHLIGHT ─── */
+    .ar-highlight {
+      border: 1px solid rgba(var(--violet-rgb), 0.3);
+      border-radius: 2px;
+      padding: 24px 28px;
+      background: rgba(var(--violet-rgb), 0.05);
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .ar-highlight::before {
+      content: 'AR CONCEPT';
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--violet);
+      position: absolute;
+      top: -8px;
+      left: 16px;
+      background: var(--night);
+      padding: 0 8px;
+    }
+
+    /* ─── LIVE LINK ─── */
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid rgba(var(--gold-rgb), 0.3);
+      padding: 10px 20px;
+      border-radius: 1px;
+      transition: all 0.25s ease;
+      margin: 16px 0;
+    }
+
+    .doc-link:hover {
+      background: rgba(var(--gold-rgb), 0.1);
+      border-color: var(--gold);
+    }
+
+    /* ─── INHOUDSOPGAVE ─── */
+    .toc {
+      border: 1px solid rgba(var(--gold-rgb), 0.2);
+      border-radius: 2px;
+      padding: 24px 28px;
+      background: rgba(10, 12, 20, 0.4);
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.6s forwards;
+    }
+
+    .toc-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 16px;
+    }
+
+    .toc ol {
+      list-style: none;
+      padding: 0;
+      counter-reset: toc;
+    }
+
+    .toc ol li {
+      counter-increment: toc;
+      font-family: 'IM Fell English', serif;
+      font-size: 17px;
+      color: rgba(200, 212, 240, 0.6);
+      padding: 5px 0;
+      border-bottom: 1px dotted rgba(var(--gold-rgb), 0.1);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .toc ol li::before {
+      content: counter(toc, upper-roman);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--gold-dim);
+      min-width: 24px;
+    }
+
+    .toc ol li a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc ol li a:hover {
+      color: var(--gold);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Sterrenveld -->
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<!-- Navigatie -->
+<nav class="site-nav" aria-label="Hoofdnavigatie">
+  <a href="index.html" class="nav-link">Het Dagboek</a>
+  <a href="documentatie.html" class="nav-link actief" aria-current="page">DP11: Tussenrapport</a>
+</nav>
+
+<!-- Documentatie inhoud -->
+<div class="doc-container">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="doc-header-deco">DP11 — Analyseren & Ontwerpen</div>
+    <h1>Jiminy's Dagboek<em>Tussenrapport</em></h1>
+    <div class="header-rule"></div>
+    <p>Analyse- en ontwerpverantwoording van het project. Van sfeeronderzoek tot concept en doelgroep.</p>
+  </div>
+
+  <!-- Inhoudsopgave -->
+  <nav class="toc" aria-label="Inhoudsopgave">
+    <div class="toc-title">Inhoudsopgave</div>
+    <ol>
+      <li><a href="#inleiding">Inleiding</a></li>
+      <li><a href="#sfeer">Sfeer en stijl</a></li>
+      <li><a href="#kleurpalet">Kleurpalet</a></li>
+      <li><a href="#typografie">Typografie</a></li>
+      <li><a href="#interactie">Interactiepatroon</a></li>
+      <li><a href="#doelgroep">Doelgroepanalyse</a></li>
+      <li><a href="#concept">Concept & Ontwerp</a></li>
+    </ol>
+  </nav>
+
+  <!-- ── I. INLEIDING ── -->
+  <section class="doc-section" id="inleiding" aria-labelledby="titel-inleiding">
+    <div class="doc-section-title">Deel I</div>
+    <h2 id="titel-inleiding">Inleiding</h2>
+    <p>Dit document beschrijft de analyse- en ontwerpfase van het AR-project: <em>Jiminy's Dagboek</em>. Het project is een interactieve website die de zwaarste morele momenten uit de Kingdom Hearts-reeks analyseert vanuit het perspectief van Jiminy Cricket — Japie Krekel in het Nederlands — als geweten van het verhaal.</p>
+    <p>De website is gepubliceerd via GitHub Pages en bevat een tijdlijnstructuur met filterfuncties en accordion-entries.</p>
+    <a href="https://jayheshya.github.io/Jiminy-s-Dagboek/" class="doc-link" target="_blank" rel="noopener">
+      ✦ &nbsp;Bekijk de live website
+    </a>
+  </section>
+
+  <!-- ── II. SFEER EN STIJL ── -->
+  <section class="doc-section" id="sfeer" aria-labelledby="titel-sfeer">
+    <div class="doc-section-title">Deel II — Analysefase</div>
+    <h2 id="titel-sfeer">Sfeer en Stijl</h2>
+
+    <p>Het ontwerp ligt als het ware tussen twee werelden in: de duisternis en het mysterie van de nacht, en het warme licht van een kaarsje. Elke keuze — kleur, lettertype, animatie — is een uitdrukking van die spanning.</p>
+
+    <p>Het ontwerp put uit drie bronnen:</p>
+    <ul>
+      <li><strong>Kingdom Hearts games</strong> — Sterrenbeelden, drijvende eilanden, sleutels als symbolen van toegang en afsluiting. Het motief van licht dat door de duisternis breekt onderstreept de voortdurende strijd tussen hoop en onderdrukking.</li>
+      <li><strong>Middeleeuwse manuscripten</strong> — Verluchte handschriften, marginalia, de kwetsbaarheid van kennis op papier. Jiminy's dagboek, bijgehouden in opdracht van koningin Minnie Mouse, weerspiegelt deze traditie.</li>
+      <li><strong>Nachtelijke sterrenhemel</strong> — Sterrenkaarten en astronomische atlassen uit de 17e eeuw. Dit versterkt het gevoel van het onkenbare ontdekken — Kingdom Hearts is een avontuur richting iets mysterieus.</li>
+    </ul>
+  </section>
+
+  <!-- ── III. KLEURPALET ── -->
+  <section class="doc-section" id="kleurpalet" aria-labelledby="titel-kleur">
+    <div class="doc-section-title">Analysefase — Visuele Taal</div>
+    <h2 id="titel-kleur">Kleurpalet</h2>
+
+    <p>Het palet is opgebouwd rond diepdonkere marineblauw-zwarten als basis, met goud als enige lichtbron. Paarse accenten verwijzen naar de Heartless en de schuilende duisternis. Perkamentkleur verschijnt wanneer het dagboek zelf aan het woord is.</p>
+
+    <div class="color-grid">
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #0a0c14;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Night</div>
+          <div class="swatch-hex">#0a0c14</div>
+          <div class="swatch-role">Achtergrond — de diepste nacht</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #141828;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Midnight</div>
+          <div class="swatch-hex">#141828</div>
+          <div class="swatch-role">Secties en kaders</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #0f1220;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Deep</div>
+          <div class="swatch-hex">#0f1220</div>
+          <div class="swatch-role">Tussentoon — diepte</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #c8973a;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Gold</div>
+          <div class="swatch-hex">#c8973a</div>
+          <div class="swatch-role">Primair accent — de enige lichtbron</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #8a6520;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Gold Dim</div>
+          <div class="swatch-hex">#8a6520</div>
+          <div class="swatch-role">Gedempte labels en subtiele accenten</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #3d1f5e;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Heartless</div>
+          <div class="swatch-hex">#3d1f5e</div>
+          <div class="swatch-role">Paarse gloed — de Heartless, schuilend duister</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #a07cc8;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Violet</div>
+          <div class="swatch-hex">#a07cc8</div>
+          <div class="swatch-role">Tags: verraad & duisternis</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #f5ead0;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Parchment</div>
+          <div class="swatch-hex">#f5ead0</div>
+          <div class="swatch-role">Perkament — wanneer het dagboek spreekt</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #c9b48a;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Parchment Shadow</div>
+          <div class="swatch-hex">#c9b48a</div>
+          <div class="swatch-role">Dagboektekst — verouderd papier</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #c8d4f0;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Starlight</div>
+          <div class="swatch-hex">#c8d4f0</div>
+          <div class="swatch-role">Bodytekst — sterrenlicht</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: #5bc8d8;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Aqua</div>
+          <div class="swatch-hex">#5bc8d8</div>
+          <div class="swatch-role">Tags: identiteit & herinnering</div>
+        </div>
+      </div>
+
+      <div class="color-swatch">
+        <div class="swatch-color" style="background: linear-gradient(90deg, #3d6b8a, #a070c8, #c87070);"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Moreel Gewicht</div>
+          <div class="swatch-hex">Verloop</div>
+          <div class="swatch-role">Koud → warm: licht naar duisternis</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── IV. TYPOGRAFIE ── -->
+  <section class="doc-section" id="typografie" aria-labelledby="titel-type">
+    <div class="doc-section-title">Analysefase — Visuele Taal</div>
+    <h2 id="titel-type">Typografie</h2>
+    <p>Drie lettertypen vullen elk hun eigen rol in het verhaal.</p>
+
+    <div class="type-block">
+      <div class="type-label">Cinzel — Titels en labels</div>
+      <div class="type-cinzel">Jiminy's Dagboek</div>
+      <p style="margin-top: 10px; font-size: 15px;">Romeins, monumentaal en tijdloos. Het gevoel van een inscriptie op steen. Gebruikt voor alle navigatie, knoppen en koppen.</p>
+    </div>
+
+    <div class="type-block">
+      <div class="type-label">IM Fell English — Jiminy's stem</div>
+      <div class="type-fell">"Hij deed het zonder aarzelen. Dreef het zwaard in zijn eigen borst om de harten binnenin te bevrijden."</div>
+      <p style="margin-top: 10px; font-size: 15px;">Een 17e-eeuws schreeflettertype met karakter en imperfectie. Persoonlijk, literair, een tikje melancholisch. De stem van het dagboek zelf.</p>
+    </div>
+
+    <div class="type-block">
+      <div class="type-label">Crimson Pro — Analyseteksten</div>
+      <div class="type-crimson">De daad is een diepgaande omkering van het doel van de Keyblade. Het instrument van verovering dat tegen zijn eigen drager wordt gekeerd voor de bevrijding van anderen.</div>
+      <p style="margin-top: 10px; font-size: 15px;">Leesbaar en elegant. Zakelijker dan IM Fell, maar nog steeds warm. Gebruikt voor de morele analyses.</p>
+    </div>
+  </section>
+
+  <!-- ── V. INTERACTIEPATROON ── -->
+  <section class="doc-section" id="interactie" aria-labelledby="titel-interactie">
+    <div class="doc-section-title">Analysefase</div>
+    <h2 id="titel-interactie">Interactiepatroon</h2>
+    <p>De accordion-structuur is bewust gekozen. Een dagboek open je pagina voor pagina. De vorige pagina sluit als de volgende opent. In dit digitale dagboek sluit een entry wanneer een andere wordt geopend — het is onmogelijk twee entries tegelijkertijd te lezen.</p>
+    <p>Iedere entry bevat een beschrijving van het verhaalmoment en een morele analyse van Jiminy zelf. De morele-gewichtsbalk is een visuele metafoor: hoe zwaarder de keuze, hoe verder de balk reikt van koud blauw naar warm rood.</p>
+
+    <div class="type-block" style="margin-top: 20px;">
+      <div class="type-label">Morele gewichtsschaal — voorbeeld</div>
+      <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+        <span style="font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--gold-dim); text-transform: uppercase; white-space: nowrap;">Moreel gewicht</span>
+        <div style="flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;">
+          <div style="height: 100%; width: 88%; background: linear-gradient(90deg, #3d6b8a, #a070c8, #c87070); border-radius: 2px;"></div>
+        </div>
+        <span style="font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold);">88</span>
+      </div>
+      <p style="margin-top: 12px; font-size: 15px;">De balk loopt van koud blauw (rationele, afstandelijke keuze) via paars naar warm rood (emotionele, zware of moreel ambigue keuze).</p>
+    </div>
+  </section>
+
+  <!-- ── VI. DOELGROEP ── -->
+  <section class="doc-section" id="doelgroep" aria-labelledby="titel-doelgroep">
+    <div class="doc-section-title">Deel II — Analysefase</div>
+    <h2 id="titel-doelgroep">Doelgroepanalyse</h2>
+
+    <h3>Primaire doelgroep: Kingdom Hearts-fans (16–28 jaar)</h3>
+    <p>Dit zijn spelers die de reeks kennen en er emotioneel bij betrokken zijn. Ze zijn opgegroeid met de games of hebben ze later ontdekt. Wat hen bindt is niet zozeer de actie, maar de verhaaldiepte. Thema's van identiteit, vriendschap en verlies raken hen persoonlijk. Kingdom Hearts-fans zijn gewend aan complexe lore en waarderen inhoud die de verhalen serieus neemt.</p>
+
+    <table class="doc-table" aria-label="Doelgroep Kingdom Hearts-fans">
+      <tr>
+        <th>Aspect</th>
+        <th>Omschrijving</th>
+      </tr>
+      <tr>
+        <td>Doelgroep</td>
+        <td>Kingdom Hearts-fans, 16–28 jaar</td>
+      </tr>
+      <tr>
+        <td>Behoeften</td>
+        <td>Herkenning, diepgang, nieuwe invalshoek op verhalen die ze al kennen</td>
+      </tr>
+      <tr>
+        <td>Gedrag</td>
+        <td>Lezen wikis, kijken lore-video's op YouTube, volgen fanaccounts, gewend aan rijke gelaagde interfaces</td>
+      </tr>
+    </table>
+
+    <h3>Secundaire doelgroep: Geïnteresseerden in narratieve ethiek (18–35 jaar)</h3>
+    <p>Mensen die niet per se de games kennen. Ze worden aangetrokken door de filosofische insteek. De vragen die de website stelt — over opoffering, identiteit, bestaansrecht — zijn universeel en bieden veel ruimte voor discussie.</p>
+
+    <table class="doc-table" aria-label="Doelgroep narratieve ethiek">
+      <tr>
+        <th>Aspect</th>
+        <th>Omschrijving</th>
+      </tr>
+      <tr>
+        <td>Doelgroep</td>
+        <td>Geïnteresseerden in narratieve ethiek, 18–35 jaar</td>
+      </tr>
+      <tr>
+        <td>Behoeften</td>
+        <td>Toegankelijkheid, context, intellectuele uitdaging</td>
+      </tr>
+      <tr>
+        <td>Gedrag</td>
+        <td>Lezen longform, waarderen redenering en onderbouwing</td>
+      </tr>
+    </table>
+
+    <h3>Ontwerpimplicaties</h3>
+    <ul>
+      <li>Filterfunctie is essentieel voor de secundaire doelgroep — thematisch navigeren zonder de volledige Kingdom Hearts-lore te kennen moet mogelijk zijn.</li>
+      <li>Accordion voorkomt overweldiging — beide doelgroepen bepalen zelf het tempo.</li>
+      <li>Mobiele leesbaarheid is cruciaal: grote lettertypes, voldoende witruimte, knoppen groot genoeg om aan te raken.</li>
+    </ul>
+  </section>
+
+  <!-- ── VII. CONCEPT ── -->
+  <section class="doc-section" id="concept" aria-labelledby="titel-concept">
+    <div class="doc-section-title">Deel III — Ontwerpfase</div>
+    <h2 id="titel-concept">Concept & Ontwerp</h2>
+
+    <h3>Kernconcept</h3>
+    <p>Kingdom Hearts wordt vaak omschreven als een verhaal over vriendschap en licht tegen duisternis. Het is ook een reeks die keer op keer diepe morele vragen stelt zonder ze te beantwoorden. Jiminy's Dagboek neemt die vragen serieus en presenteert de moreel zwaarste momenten als ethische casussen.</p>
+
+    <div class="doc-quote">
+      "Wat als je de grootste morele momenten uit een videogame behandelt als filosofische teksten die bewaard moeten worden?"
+    </div>
+
+    <h3>AR-concept</h3>
+    <div class="ar-highlight">
+      <p>De volledig gerealiseerde versie van de website komt met een fysiek dagboek, gevuld met scanbare afbeeldingen. Het scannen van een afbeelding neemt je mee door een casus die Jiminy heeft opgeschreven. Verteld door Jiminy zelf die uit het boek springt — hij legt de casus uit en jij maakt een keuze door de volgende afbeelding te scannen. Aan de hand van jouw keuze legt Jiminy uit of je een stap hebt gezet richting licht of duisternis.</p>
+    </div>
+
+    <h3>Waarom Jiminy Cricket?</h3>
+    <p>Jiminy is de perfecte verteller. Hij is klein, staat altijd aan de zijlijn en heeft geen macht. Zijn rol in de Disney-mythologie — het geweten in Pinokkio — maakt hem tot de ideale morele getuige die commentaar geeft op jouw keuzes.</p>
+    <p>In de Kingdom Hearts-games krijgt Jiminy Cricket een missie van koningin Minnie Mouse om het verhaal van Sora op te schrijven. Daarnaast fungeert hij als het morele kompas van hoofdpersoon Sora. De acht punten met het zwaarste morele gewicht staan op dit moment live op de website.</p>
+
+    <h3>Originaliteit</h3>
+    <p>De meeste Kingdom Hearts-fansites zijn encyclopedisch of nostalgisch. Dit project kiest een andere insteek: analytisch én emotioneel. Het dagboek-metafoor structureert de gehele gebruikservaring — van de accordion die je pagina voor pagina opent, tot de morele-gewichtsbalk die een subjectief oordeel visualiseert.</p>
+
+    <h3>Aansluiting bij de opdracht</h3>
+    <p>Het concept is consistent uitgewerkt van visueel tot inhoudelijk. Typografie, kleurpalet, interactiepatronen en teksten vertellen allemaal hetzelfde verhaal. Er is één helder uitgangspunt dat de gehele website aanstuurt.</p>
+
+    <h3>Authenticiteit</h3>
+    <p>Ik heb mijn volledige DP11 document door Claude gehaald en gevraagd of hij deze documentatie pagina kon genereren. Vandaar dat er een stuk meer em-dashes zitten op deze pagina vergeleken met het echte tussenrapport.</p>
+  </section>
+
+</div>
+
+<div class="scroll-bottom" aria-hidden="true">· · ✦ · ·</div>
+
+<footer>
+  <p class="footer-text">
+    DP11 — Analyseren, Ontwerpen & Peer Feedback · Jiminy's Dagboek
+  </p>
+</footer>
+
+<script>
+  // ─── STERRENVELD ───
+  const starsEl = document.getElementById('stars');
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < 160; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    star.style.cssText = [
+      `left: ${Math.random() * 100}%`,
+      `top: ${Math.random() * 100}%`,
+      `width: ${size}px`,
+      `height: ${size}px`,
+      `--d: ${(Math.random() * 4 + 2).toFixed(1)}s`,
+      `--delay: ${(Math.random() * 6).toFixed(1)}s`,
+      `--min: ${(Math.random() * 0.15 + 0.03).toFixed(2)}`,
+      `--max: ${(Math.random() * 0.6 + 0.2).toFixed(2)}`,
+    ].join(';');
+    fragment.appendChild(star);
+  }
+  starsEl.appendChild(fragment);
+
+  // ─── SCROLL REVEAL ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 100);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.doc-section').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
