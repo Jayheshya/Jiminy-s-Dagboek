@@ -719,7 +719,6 @@
   vr-mode-ui="enabled: false"
   renderer="logarithmicDepthBuffer: true; colorManagement: true"
   arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-  style="display:none"
 >
   <!-- Context marker -->
   <a-nft
@@ -900,8 +899,6 @@ document.querySelector('.back-btn').href = returnUrl;
 
 // ─── Detecteer AR mogelijkheden ───
 function detecteerAR() {
-  // Gebruik feature detection i.p.v. user-agent sniffing:
-  // als de browser getUserMedia ondersteunt, proberen we altijd AR.
   const heeftCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
   if (heeftCamera) {
@@ -921,39 +918,33 @@ function verbergLaadscherm(callback) {
 }
 
 function startARModus() {
-  // Vraag alleen toestemming — stop de stream NIET.
-  // AR.js opent zelf de camera via de a-scene; als wij de stream
-  // hier stoppen en AR.js hem daarna opnieuw probeert te openen,
-  // blokken veel browsers (met name iOS Safari en Chrome) de tweede aanvraag.
+  // Vraag cameratoestemming. De <a-scene> staat al actief in de DOM —
+  // AR.js heeft geen display:none scene nodig, het beheert de camera zelf.
+  // Wij vragen hier alleen toestemming zodat de gebruiker niet verrast wordt,
+  // en stoppen de preview-stream direct zodat AR.js hem kan overnemen.
   navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
     .then(stream => {
-      // Toestemming verleend: geef de stream meteen door aan AR.js
-      // door de scene zichtbaar te maken. AR.js beheert de stream zelf.
+      stream.getTracks().forEach(t => t.stop()); // Vrijgeven; AR.js opent zijn eigen stream
       arBeschikbaar = true;
-      stream.getTracks().forEach(t => t.stop()); // stop preview-stream; AR.js opent zijn eigen
-      elArScene.style.display = 'block';
 
-      // Wacht tot de scene en camera volledig zijn geïnitialiseerd
-      const scene = elArScene;
-      const onReady = () => {
+      // Wacht op AR.js camera-initialisatie
+      const onCameraReady = () => {
         verbergLaadscherm();
         koppelARMarkers();
       };
 
-      // Luister op het 'camera-init-done' event van AR.js
-      scene.addEventListener('camera-init', onReady, { once: true });
+      elArScene.addEventListener('camera-init', onCameraReady, { once: true });
 
-      // Fallback: als het event na 4 seconden nog niet gevuurd is,
-      // verberg het laadscherm toch (scene is waarschijnlijk al klaar).
+      // Fallback na 5 seconden als het event niet vuurt
       setTimeout(() => {
         if (elCameraLoading.style.display !== 'none') {
           verbergLaadscherm();
           koppelARMarkers();
         }
-      }, 4000);
+      }, 5000);
     })
     .catch(err => {
-      console.warn('Camera geblokkeerd:', err);
+      console.warn('Camera geblokkeerd:', err.name, err.message);
       elCameraLoading.style.display = 'none';
       elGeenCamera.style.display = 'flex';
     });
@@ -961,8 +952,9 @@ function startARModus() {
 
 window.startDemoMode = function() {
   elGeenCamera.style.display = 'none';
+  elArScene.style.visibility = 'hidden'; // Verberg AR scene maar laat DOM intact
   elDemoMode.style.display = 'flex';
-  elScanInstructie.style.display = 'none'; // Verberg direct, niet via opacity
+  elScanInstructie.style.display = 'none';
 }
 
 // ─── AR Marker events ───
@@ -1119,6 +1111,7 @@ document.getElementById('demo-from-camera-btn').addEventListener('click', startD
 document.querySelectorAll('.demo-btn[data-trigger]').forEach(btn => {
   btn.addEventListener('click', () => {
     elDemoMode.style.display = 'none';
+    elArScene.style.visibility = 'visible';
     triggerAR(btn.dataset.trigger);
   });
 });
