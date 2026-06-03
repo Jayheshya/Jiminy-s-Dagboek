@@ -555,7 +555,6 @@
       font-family: inherit;
     }
     .demo-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
-    .demo-btn .btn-info {}
     .demo-btn .btn-titel {
       font-family: 'Cinzel', serif;
       font-size: 12px;
@@ -626,9 +625,8 @@
   <div style="font-size: 48px;">📷</div>
   <h2>Cameratoegang vereist</h2>
   <p>Sta cameratoestemming toe om de AR-ervaring te starten. Open deze pagina opnieuw en kies "Toestaan" als het scherm verschijnt.</p>
-  <button class="retry-btn" onclick="location.reload()">Opnieuw proberen</button>
-  <button class="retry-btn" style="margin-top: 8px; color: var(--gold-dim); border-color: rgba(var(--gold-rgb),0.2);"
-    onclick="startDemoMode()">Ga naar demo-modus</button>
+  <button class="retry-btn" id="retry-btn">Opnieuw proberen</button>
+  <button class="retry-btn" id="demo-from-camera-btn" style="margin-top: 8px; color: var(--gold-dim); border-color: rgba(var(--gold-rgb),0.2);">Ga naar demo-modus</button>
 </div>
 
 <!-- ─── Demo modus (desktop / geen AR) ─── -->
@@ -637,21 +635,21 @@
   <h2>Jiminy's AR-ervaring</h2>
   <p class="demo-sub">Kies een scantype om de AR-beleving te simuleren</p>
   <div class="demo-buttons">
-    <button class="demo-btn context" onclick="triggerAR('context')">
+    <button class="demo-btn context" data-trigger="context">
       <span class="btn-icon">🦗</span>
       <div class="btn-info">
         <div class="btn-titel">Context-scan</div>
         <div class="btn-desc">Jiminy verschijnt en legt de morele context van deze entry uit</div>
       </div>
     </button>
-    <button class="demo-btn goed" onclick="triggerAR('goed')">
+    <button class="demo-btn goed" data-trigger="goed">
       <span class="btn-icon">✨</span>
       <div class="btn-info">
         <div class="btn-titel">Goede keuze</div>
         <div class="btn-desc">Portal opent en toont de consequentie van de moreel goede keuze</div>
       </div>
     </button>
-    <button class="demo-btn slecht" onclick="triggerAR('slecht')">
+    <button class="demo-btn slecht" data-trigger="slecht">
       <span class="btn-icon">🌑</span>
       <div class="btn-info">
         <div class="btn-titel">Slechte keuze</div>
@@ -666,7 +664,7 @@
 <div id="top-bar">
   <a href="index.html" class="back-btn">← Dagboek</a>
   <div class="entry-label" id="entry-label">Laad entry…</div>
-  <button class="mute-btn" id="mute-btn" title="Geluid aan/uit" onclick="toggleMute()">🔊</button>
+  <button class="mute-btn" id="mute-btn" title="Geluid aan/uit">🔊</button>
 </div>
 
 <div id="scan-instructie">
@@ -902,36 +900,57 @@ document.querySelector('.back-btn').href = returnUrl;
 
 // ─── Detecteer AR mogelijkheden ───
 function detecteerAR() {
-  const isMobiel = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const heeftCamera = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
+  // Gebruik feature detection i.p.v. user-agent sniffing:
+  // als de browser getUserMedia ondersteunt, proberen we altijd AR.
+  const heeftCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
-  if (isMobiel && heeftCamera) {
+  if (heeftCamera) {
     startARModus();
   } else {
-    // Desktop of geen camera: demo modus
-    elCameraLoading.classList.add('fade-out');
-    setTimeout(() => {
-      elCameraLoading.style.display = 'none';
-      startDemoMode();
-    }, 800);
+    verbergLaadscherm();
+    startDemoMode();
   }
 }
 
+function verbergLaadscherm(callback) {
+  elCameraLoading.classList.add('fade-out');
+  setTimeout(() => {
+    elCameraLoading.style.display = 'none';
+    if (callback) callback();
+  }, 800);
+}
+
 function startARModus() {
-  // Probeer camera te openen
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+  // Vraag alleen toestemming — stop de stream NIET.
+  // AR.js opent zelf de camera via de a-scene; als wij de stream
+  // hier stoppen en AR.js hem daarna opnieuw probeert te openen,
+  // blokken veel browsers (met name iOS Safari en Chrome) de tweede aanvraag.
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
     .then(stream => {
-      stream.getTracks().forEach(t => t.stop());
+      // Toestemming verleend: geef de stream meteen door aan AR.js
+      // door de scene zichtbaar te maken. AR.js beheert de stream zelf.
       arBeschikbaar = true;
+      stream.getTracks().forEach(t => t.stop()); // stop preview-stream; AR.js opent zijn eigen
       elArScene.style.display = 'block';
 
-      // Verberg loading na korte delay
-      setTimeout(() => {
-        elCameraLoading.classList.add('fade-out');
-        setTimeout(() => elCameraLoading.style.display = 'none', 800);
-      }, 1500);
+      // Wacht tot de scene en camera volledig zijn geïnitialiseerd
+      const scene = elArScene;
+      const onReady = () => {
+        verbergLaadscherm();
+        koppelARMarkers();
+      };
 
-      koppelARMarkers();
+      // Luister op het 'camera-init-done' event van AR.js
+      scene.addEventListener('camera-init', onReady, { once: true });
+
+      // Fallback: als het event na 4 seconden nog niet gevuurd is,
+      // verberg het laadscherm toch (scene is waarschijnlijk al klaar).
+      setTimeout(() => {
+        if (elCameraLoading.style.display !== 'none') {
+          verbergLaadscherm();
+          koppelARMarkers();
+        }
+      }, 4000);
     })
     .catch(err => {
       console.warn('Camera geblokkeerd:', err);
@@ -943,13 +962,14 @@ function startARModus() {
 window.startDemoMode = function() {
   elGeenCamera.style.display = 'none';
   elDemoMode.style.display = 'flex';
-  elScanInstructie.style.opacity = '0';
+  elScanInstructie.style.display = 'none'; // Verberg direct, niet via opacity
 }
 
 // ─── AR Marker events ───
 function koppelARMarkers() {
-  const scene = document.querySelector('a-scene');
-  scene.addEventListener('loaded', () => {
+  const scene = elArScene;
+
+  function bindMarkers() {
     ['context', 'goed', 'slecht'].forEach(type => {
       const marker = document.getElementById(`marker-${type}`);
       if (!marker) return;
@@ -957,15 +977,18 @@ function koppelARMarkers() {
       marker.addEventListener('markerFound', () => {
         if (sessieKlaar && type !== 'context') return;
         triggerAR(type);
-        // Haptic feedback
         if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
       });
-
-      marker.addEventListener('markerLost', () => {
-        // Optioneel: panel verbergen als marker weg is
-      });
+      // markerLost: intentioneel leeg gehouden voor toekomstige uitbreiding
     });
-  });
+  }
+
+  // Als de scene al geladen is, koppel direct; anders wacht op het event.
+  if (scene.hasLoaded) {
+    bindMarkers();
+  } else {
+    scene.addEventListener('loaded', bindMarkers, { once: true });
+  }
 }
 
 // ─── Hoofd AR trigger (ook gebruikt door demo) ───
@@ -982,6 +1005,7 @@ window.triggerAR = function(type) {
 
   // Verberg scan instructie
   elScanInstructie.style.opacity = '0';
+  elScanInstructie.style.pointerEvents = 'none';
 }
 
 function toonContext() {
@@ -1057,7 +1081,7 @@ function toonOordeel(type, tekst) {
   elOordeelBanner.classList.add('visible');
 }
 
-// ─── Text-to-speech (Web Speech API placeholder) ───
+// ─── Text-to-speech (Web Speech API) ───
 function spreekTekst(tekst) {
   if (gemuted || !speechSynth) return;
   speechSynth.cancel();
@@ -1067,12 +1091,19 @@ function spreekTekst(tekst) {
   utterance.rate  = 0.88;
   utterance.pitch = 1.1;
 
-  // Probeer een NL stem
-  const stemmen = speechSynth.getVoices();
-  const nlStem  = stemmen.find(v => v.lang.startsWith('nl')) || null;
-  if (nlStem) utterance.voice = nlStem;
+  function koppelStem(u) {
+    const stemmen = speechSynth.getVoices();
+    const nlStem  = stemmen.find(v => v.lang.startsWith('nl')) || null;
+    if (nlStem) u.voice = nlStem;
+    speechSynth.speak(u);
+  }
 
-  speechSynth.speak(utterance);
+  // Chrome laadt stemmen asynchroon; als de lijst nog leeg is, wacht op voiceschanged.
+  if (speechSynth.getVoices().length > 0) {
+    koppelStem(utterance);
+  } else {
+    speechSynth.addEventListener('voiceschanged', () => koppelStem(utterance), { once: true });
+  }
 }
 
 window.toggleMute = function() {
@@ -1080,6 +1111,17 @@ window.toggleMute = function() {
   document.getElementById('mute-btn').textContent = gemuted ? '🔇' : '🔊';
   if (gemuted) speechSynth && speechSynth.cancel();
 }
+
+// ─── Event listeners (i.p.v. inline onclick) ───
+document.getElementById('mute-btn').addEventListener('click', toggleMute);
+document.getElementById('retry-btn').addEventListener('click', () => location.reload());
+document.getElementById('demo-from-camera-btn').addEventListener('click', startDemoMode);
+document.querySelectorAll('.demo-btn[data-trigger]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    elDemoMode.style.display = 'none';
+    triggerAR(btn.dataset.trigger);
+  });
+});
 
 // ─── Reset knop (demo: nieuwe scan simuleren) ───
 // (klik ergens op het scherm buiten panel/portal reset de beleving)
@@ -1104,9 +1146,6 @@ function resetSessie() {
 
 // ─── Start ───
 window.addEventListener('load', () => {
-  // Laad stemmen asynchroon (Chrome vereist dit)
-  speechSynth && speechSynth.addEventListener && speechSynth.addEventListener('voiceschanged', () => {});
-
   setTimeout(detecteerAR, 600);
 });
 </script>
