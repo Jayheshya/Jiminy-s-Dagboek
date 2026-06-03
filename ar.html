@@ -45,8 +45,32 @@
     }
 
     /* ─── A-Frame scene fullscreen ─── */
-    .a-canvas { position: fixed !important; top: 0; left: 0; }
-    a-scene { height: 100vh; width: 100vw; }
+    a-scene {
+      position: fixed !important;
+      top: 0; left: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 1;
+    }
+
+    /* AR.js maakt zelf een <video> en <canvas> aan als camera-feed.
+       Zonder deze regels blijft de feed onzichtbaar (overflow:hidden van body). */
+    video {
+      position: fixed !important;
+      top: 0; left: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      object-fit: cover;
+      z-index: 1;
+    }
+
+    .a-canvas {
+      position: fixed !important;
+      top: 0; left: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 2;
+    }
 
     /* ─── UI overlay ─── */
     #ui-overlay {
