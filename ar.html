@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 
-  <!-- AR.js + A-Frame — patroonmarkers (geen externe bestanden nodig) -->
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <!-- AR.js + A-Frame — vaste versies (stabiel op mobiel) -->
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
     /* ─── CSS variabelen (gespiegeld van stijl.css) ─── */
@@ -44,33 +44,33 @@
       color: var(--starlight);
     }
 
-    /* ─── A-Frame scene fullscreen ─── */
+    /* ─── A-Frame scene: AR.js beheert fullscreen zelf (geen embedded) ─── */
     a-scene {
       position: fixed !important;
-      top: 0; left: 0;
-      width: 100vw !important;
-      height: 100vh !important;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
       z-index: 2;
     }
 
-    /* AR.js plaatst de camera-feed als <video> direct in de body */
+    /* AR.js video-feed en canvas: zorg dat ze áchter de UI zitten */
+    .arjs-loader { display: none; }
+
     video {
       position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover;
-      z-index: 0;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      z-index: 1 !important;
     }
 
-    .a-canvas, canvas {
+    canvas, .a-canvas {
       position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      z-index: 1;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 2 !important;
     }
 
     /* ─── UI overlay ─── */
@@ -759,14 +759,13 @@
 </div>
 
 <!-- ─── A-Frame AR Scene ─── -->
-<!-- Markers: HIRO = context, KANJI = goed, LETTERА (barcode 0) = slecht  -->
-<!-- Print deze via: https://ar-js-org.github.io/AR.js-Docs/marker-based/ -->
+<!-- Markers: HIRO = context, KANJI = goed, BARCODE 0 = slecht  -->
+<!-- Print via: https://ar-js-org.github.io/AR.js-Docs/marker-based/ -->
 <a-scene
   id="ar-scene"
   vr-mode-ui="enabled: false"
-  renderer="logarithmicDepthBuffer: true; colorManagement: true"
-  embedded
-  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceWidth: 1280; sourceHeight: 960; displayWidth: 1280; displayHeight: 960;"
+  renderer="antialias: true; logarithmicDepthBuffer: false;"
+  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
 >
   <!-- CONTEXT marker: Hiro (standaard ingebouwd) -->
   <a-marker
@@ -955,48 +954,73 @@ function verbergLaadscherm(callback) {
 }
 
 function startARModus() {
-  // Vraag cameratoestemming. AR.js beheert de camera zelf via de <a-scene>.
-  // Wij testen hier alleen of de gebruiker toestemming geeft — de stream
-  // laten we OPEN staan zodat AR.js hem direct kan overnemen zonder race condition.
+  // Test of camera beschikbaar is, stop daarna de stream meteen zodat
+  // AR.js de camera zelf kan overnemen zonder conflict.
   navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
     .then(stream => {
-      // Stream NIET stoppen — AR.js pakt de camera over via zijn eigen pipeline.
-      // We laten de test-stream doorlopen om te voorkomen dat de <video> feed zwart blijft.
+      // Stop test-stream DIRECT — AR.js opent zijn eigen stream via zijn pipeline.
+      stream.getTracks().forEach(t => t.stop());
+
       arBeschikbaar = true;
 
-
       const onSceneLoaded = () => {
-        // BELANGRIJK:
-        // Stop de test-stream NIET hier. AR.js gebruikt vaak dezelfde camera-pipeline.
-        // Als we vroeg stoppen kan de <video> feed zwart blijven/verdwijnen.
-        // (We laten AR.js de camera vervolgens beheren.)
         verbergLaadscherm();
         koppelARMarkers();
+
+        // Extra check na 3s: als de video nog steeds zwart is (geen srcObject),
+        // toon dan alsnog een waarschuwing met demo-optie
+        setTimeout(() => {
+          const video = document.querySelector('video');
+          if (video && !video.srcObject && !video.src) {
+            toonCameraWaarschuwing();
+          }
+        }, 3000);
       };
 
-
-      // Wacht op AR.js 'loaded' event van de scene
       if (elArScene.hasLoaded) {
         onSceneLoaded();
       } else {
         elArScene.addEventListener('loaded', onSceneLoaded, { once: true });
 
-        // Fallback na 8 seconden als het event niet vuurt
-        // Let op: ook hier stoppen we de stream niet.
+        // Fallback na 10 seconden
         setTimeout(() => {
           if (elCameraLoading.style.display !== 'none') {
             verbergLaadscherm();
             koppelARMarkers();
           }
-        }, 8000);
+        }, 10000);
       }
     })
     .catch(err => {
-
       console.warn('Camera geblokkeerd:', err.name, err.message);
       elCameraLoading.style.display = 'none';
       elGeenCamera.style.display = 'flex';
     });
+}
+
+function toonCameraWaarschuwing() {
+  // Video feed is zwart: toon een niet-storende banner met demo-optie
+  const banner = document.createElement('div');
+  banner.style.cssText = `
+    position: fixed; bottom: 160px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,12,20,0.9); border: 1px solid rgba(200,151,58,0.3);
+    border-radius: 2px; padding: 12px 20px; z-index: 90;
+    font-family: 'IM Fell English', serif; font-style: italic;
+    font-size: 14px; color: rgba(200,212,240,0.7); text-align: center;
+    width: min(340px, calc(100vw - 32px));
+  `;
+  banner.innerHTML = `
+    Camera-feed niet zichtbaar?
+    <button onclick="startDemoMode()" style="
+      display: block; margin: 8px auto 0;
+      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gold);
+      background: transparent; border: 1px solid rgba(200,151,58,0.3);
+      padding: 6px 16px; cursor: pointer; border-radius: 1px;
+    ">Gebruik demo-modus</button>
+  `;
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 8000);
 }
 
 window.startDemoMode = function() {
