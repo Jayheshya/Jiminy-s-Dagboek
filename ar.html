@@ -414,12 +414,13 @@
       opacity: 0;
       transform: translateX(-50%) translateY(-12px);
       transition: opacity 0.5s ease, transform 0.5s ease;
-      pointer-events: none;
+      pointer-events: none; /* wordt auto als .visible */
       text-align: center;
     }
     #oordeel-banner.visible {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
+      pointer-events: all;
     }
     .oordeel-label {
       font-family: 'Cinzel', serif;
@@ -530,7 +531,7 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      z-index: 10;
+      z-index: 10; /* Intentioneel laag: panels (65/70/75) zweven er bovenop als achtergrond */
       overflow-y: auto;
     }
 
@@ -656,33 +657,35 @@
 
 <!-- ─── Demo modus (desktop / geen AR) ─── -->
 <div id="demo-mode">
-  <div class="demo-header">Morele Spiegel</div>
-  <h2>Jiminy's AR-ervaring</h2>
-  <p class="demo-sub">Kies een scantype om de AR-beleving te simuleren</p>
-  <div class="demo-buttons">
-    <button class="demo-btn context" data-trigger="context">
-      <span class="btn-icon">🦗</span>
-      <div class="btn-info">
-        <div class="btn-titel">Context-scan</div>
-        <div class="btn-desc">Jiminy verschijnt en legt de morele context van deze entry uit</div>
-      </div>
-    </button>
-    <button class="demo-btn goed" data-trigger="goed">
-      <span class="btn-icon">✨</span>
-      <div class="btn-info">
-        <div class="btn-titel">Goede keuze</div>
-        <div class="btn-desc">Portal opent en toont de consequentie van de moreel goede keuze</div>
-      </div>
-    </button>
-    <button class="demo-btn slecht" data-trigger="slecht">
-      <span class="btn-icon">🌑</span>
-      <div class="btn-info">
-        <div class="btn-titel">Slechte keuze</div>
-        <div class="btn-desc">Portal opent en toont de consequentie van de moreel slechte keuze</div>
-      </div>
-    </button>
+  <div id="demo-content" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+    <div class="demo-header">Morele Spiegel</div>
+    <h2>Jiminy's AR-ervaring</h2>
+    <p class="demo-sub">Kies een scantype om de AR-beleving te simuleren</p>
+    <div class="demo-buttons">
+      <button class="demo-btn context" data-trigger="context">
+        <span class="btn-icon">🦗</span>
+        <div class="btn-info">
+          <div class="btn-titel">Context-scan</div>
+          <div class="btn-desc">Jiminy verschijnt en legt de morele context van deze entry uit</div>
+        </div>
+      </button>
+      <button class="demo-btn goed" data-trigger="goed">
+        <span class="btn-icon">✨</span>
+        <div class="btn-info">
+          <div class="btn-titel">Goede keuze</div>
+          <div class="btn-desc">Portal opent en toont de consequentie van de moreel goede keuze</div>
+        </div>
+      </button>
+      <button class="demo-btn slecht" data-trigger="slecht">
+        <span class="btn-icon">🌑</span>
+        <div class="btn-info">
+          <div class="btn-titel">Slechte keuze</div>
+          <div class="btn-desc">Portal opent en toont de consequentie van de moreel slechte keuze</div>
+        </div>
+      </button>
+    </div>
+    <div class="demo-footer">Op een mobiel apparaat met camera werkt de volledige AR-ervaring</div>
   </div>
-  <div class="demo-footer">Op een mobiel apparaat met camera werkt de volledige AR-ervaring</div>
 </div>
 
 <!-- ─── UI Overlay ─── -->
@@ -736,6 +739,23 @@
 <div id="oordeel-banner">
   <div class="oordeel-label" id="oordeel-label">Jiminy's oordeel</div>
   <div class="oordeel-tekst" id="oordeel-tekst"></div>
+  <button id="reset-btn" onclick="resetSessie()" style="
+    margin-top: 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    background: transparent;
+    border: 1px solid rgba(var(--gold-rgb), 0.2);
+    padding: 7px 18px;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.25s;
+    pointer-events: all;
+  " onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">
+    ↩ Nieuwe scan
+  </button>
 </div>
 
 <!-- ─── A-Frame AR Scene ─── -->
@@ -985,6 +1005,10 @@ window.startDemoMode = function() {
   elArScene.style.display = 'none';
   elDemoMode.style.display = 'flex';
   elScanInstructie.style.display = 'none';
+  // Reset eventuele vorige sessie UI
+  elJiminyPanel.classList.remove('visible');
+  elPortalOverlay.classList.remove('visible');
+  elOordeelBanner.classList.remove('visible');
 }
 
 // ─── AR Marker events ───
@@ -1025,27 +1049,40 @@ window.triggerAR = function(type) {
     toonKeuze('slecht');
   }
 
-  // Verberg scan instructie
-  elScanInstructie.style.opacity = '0';
-  elScanInstructie.style.pointerEvents = 'none';
+  // Verberg scan instructie (alleen relevant in AR modus)
+  if (arBeschikbaar) {
+    elScanInstructie.style.opacity = '0';
+    elScanInstructie.style.pointerEvents = 'none';
+  }
 }
 
 function toonContext() {
   const ctx = entry.context;
 
-  // Panel stijl
-  elJiminyPanel.style.setProperty('--panel-accent', ctx.kleur);
-  elPanelType.textContent = ctx.type;
-  elPanelType.style.color = ctx.kleur;
-  elJiminyText.textContent = entry.jiminy_context;
+  // Zet kleur: als het een CSS variabele is, resolve dan naar de echte hex
+  const kleur = ctx.kleur.startsWith('var(')
+    ? getComputedStyle(document.documentElement)
+        .getPropertyValue(ctx.kleur.replace(/^var\((.+)\)$/, '$1').trim()).trim()
+    : ctx.kleur;
 
-  // Verberg portal
+  // Panel stijl
+  elJiminyPanel.style.setProperty('--panel-accent', kleur);
+  elPanelType.textContent = ctx.type;
+  elPanelType.style.color = kleur;
+
+  // Toon eerst de context-tekst, daarna Jiminy's commentaar
+  elJiminyText.innerHTML =
+    `<em style="display:block; margin-bottom:10px; opacity:0.75; font-size:14px;">${ctx.tekst}</em>` +
+    entry.jiminy_context;
+
+  // Verberg portal (van vorige sessie)
   elPortalOverlay.classList.remove('visible');
+  elOordeelBanner.classList.remove('visible');
 
   // Toon jiminy panel
   elJiminyPanel.classList.add('visible');
 
-  // Audio
+  // Audio: spreek de Jiminy-tekst (beknopter)
   spreekTekst(entry.jiminy_context);
 }
 
@@ -1140,8 +1177,10 @@ document.getElementById('retry-btn').addEventListener('click', () => location.re
 document.getElementById('demo-from-camera-btn').addEventListener('click', startDemoMode);
 document.querySelectorAll('.demo-btn[data-trigger]').forEach(btn => {
   btn.addEventListener('click', () => {
-    elDemoMode.style.display = 'none';
-    // In demo modus blijft de AR scene verborgen; portal/panel worden direct getoond
+    // Verberg de knoppen maar NIET de demo-achtergrond
+    const demoContent = document.getElementById('demo-content');
+    if (demoContent) demoContent.style.display = 'none';
+    // In demo modus blijft de AR scene verborgen; portal/panel worden boven demo-bg getoond
     triggerAR(btn.dataset.trigger);
   });
 });
@@ -1158,12 +1197,16 @@ function resetSessie() {
   elJiminyPanel.classList.remove('visible');
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
-  elScanInstructie.style.opacity = '1';
   speechSynth && speechSynth.cancel();
 
-  // In demo modus: toon knoppen opnieuw
+  // In demo modus: toon knoppen opnieuw, géén scan-instructie
   if (!arBeschikbaar) {
-    elDemoMode.style.display = 'flex';
+    const demoContent = document.getElementById('demo-content');
+    if (demoContent) demoContent.style.display = 'flex';
+  } else {
+    // AR modus: toon scan-instructie weer
+    elScanInstructie.style.opacity = '1';
+    elScanInstructie.style.display = '';
   }
 }
 
