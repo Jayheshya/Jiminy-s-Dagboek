@@ -32,6 +32,14 @@
   --scroll-width:      680px;
 }
 
+main {
+  position: relative;
+  z-index: 10;
+  max-width: var(--scroll-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
 /* ─── PAGINANAVIGATIE ─── */
 .site-nav {
   position: fixed;
@@ -97,9 +105,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 30%, rgba(61, 31, 94, 0.35) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 70%, rgba(20, 24, 40, 0.8)  0%, transparent 55%),
-    radial-gradient(ellipse at 50% 50%, #0a0c14 0%, #06080f 100%);
+    radial-gradient(ellipse at 20% 30%, rgba(54, 34, 77, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 70%, rgba(31, 36, 56, 0.8)  0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, #161929 0%, #06080f 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -113,8 +121,10 @@ body::before {
 }
 
 .star {
-  position: absolute;
+  position: sticky;
+  top: 0;
   border-radius: 50%;
+  z-index: 0;
   background: white;
   animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
   animation-delay: var(--delay, 0s);
@@ -253,8 +263,8 @@ h1 em {
 .filter-btn {
   background: transparent;
   border: 1px solid rgba(var(--gold-rgb), 0.25);
-  color: rgba(200, 212, 240, 0.55);
-  font-family: 'Cinzel', serif;
+  color: rgba(200, 212, 240, 0.659);
+  font-family: 'IM Fell English', serif;
   font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -458,7 +468,7 @@ h1 em {
   font-family: 'Crimson Pro', serif;
   font-style: italic;
   font-size: 17px;
-  color: rgba(200, 212, 240, 0.45);
+  color: rgba(200, 212, 240, 0.659);
 }
 
 .entry-arrow {
@@ -632,7 +642,7 @@ footer {
 .footer-text {
   font-family: 'IM Fell English', serif;
   font-size: 14px;
-  color: rgba(200, 212, 240, 0.3);
+  color: rgba(200, 212, 240, 0.659);
 }
 
 /* ─── ANIMATIES ─── */
