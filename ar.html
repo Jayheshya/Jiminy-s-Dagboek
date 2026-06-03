@@ -4,17 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Jiminy's AR — Morele Spiegel</title>
-
-  <!-- Fonts (zelfde als hoofdsite) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 
-  <!-- AR.js + A-Frame — vaste versies (stabiel op mobiel) -->
-  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
-
   <style>
-    /* ─── CSS variabelen (gespiegeld van stijl.css) ─── */
     :root {
       --ink:              #1a1409;
       --parchment:        #f5ead0;
@@ -22,7 +15,6 @@
       --parchment-shadow: #c9b48a;
       --night:            #0a0c14;
       --deep:             #0f1220;
-      --midnight:         #141828;
       --starlight:        #c8d4f0;
       --gold:             #c8973a;
       --gold-dim:         #8a6520;
@@ -32,53 +24,28 @@
       --aqua-rgb:         91, 200, 216;
       --violet:           #a07cc8;
       --violet-rgb:       160, 124, 200;
-      --accent-red:       #8b2020;
     }
 
-    /* ─── Reset & base ─── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--night); }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    body { font-family: 'Crimson Pro', Georgia, serif; color: var(--starlight); }
 
-    body {
-      font-family: 'Crimson Pro', Georgia, serif;
-      color: var(--starlight);
+    /* ─── Camera video achtergrond ─── */
+    #camera-video {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
     }
 
-    /* ─── A-Frame scene: AR.js beheert fullscreen zelf (geen embedded) ─── */
-    a-scene {
-      position: fixed !important;
-      top: 0 !important; left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      z-index: 2;
-    }
-
-    /* AR.js video-feed en canvas: zorg dat ze áchter de UI zitten */
-    .arjs-loader { display: none; }
-
-    video {
-      position: fixed !important;
-      top: 0 !important; left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      object-fit: cover !important;
-      z-index: 1 !important;
-    }
-
-    canvas, .a-canvas {
-      position: fixed !important;
-      top: 0 !important; left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      z-index: 2 !important;
-    }
-
-    /* ─── UI overlay ─── */
-    #ui-overlay {
+    /* ─── Alle UI bovenop de video ─── */
+    #ui-root {
       position: fixed;
       inset: 0;
+      z-index: 10;
       pointer-events: none;
-      z-index: 50;
     }
 
     /* ─── Top balk ─── */
@@ -107,11 +74,6 @@
       border: 1px solid rgba(var(--gold-rgb), 0.25);
       border-radius: 1px;
       transition: all 0.25s ease;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
     #top-bar .back-btn:hover { color: var(--gold); border-color: rgba(var(--gold-rgb), 0.5); }
 
@@ -139,320 +101,17 @@
       transition: all 0.25s;
       pointer-events: all;
     }
-    #top-bar .mute-btn:hover { color: var(--gold); border-color: rgba(var(--gold-rgb), 0.5); }
 
-    /* ─── Scan-instructie (begin scherm) ─── */
-    #scan-instructie {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      padding: 24px 24px 36px;
-      background: linear-gradient(transparent, rgba(10, 12, 20, 0.92));
-      text-align: center;
-      pointer-events: none;
-      z-index: 60;
-      transition: opacity 0.5s ease;
-    }
-
-    #scan-instructie .pulse-ring {
-      width: 56px; height: 56px;
-      border: 2px solid rgba(var(--gold-rgb), 0.4);
-      border-radius: 50%;
-      margin: 0 auto 16px;
-      animation: pulseRing 2s ease-in-out infinite;
-    }
-    @keyframes pulseRing {
-      0%, 100% { transform: scale(1); opacity: 0.5; box-shadow: 0 0 0 0 rgba(var(--gold-rgb), 0.3); }
-      50% { transform: scale(1.08); opacity: 1; box-shadow: 0 0 0 8px rgba(var(--gold-rgb), 0); }
-    }
-
-    #scan-instructie h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 13px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 8px;
-    }
-
-    #scan-instructie p {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: rgba(200, 212, 240, 0.65);
-      line-height: 1.6;
-    }
-
-    /* Drie marker-icoontjes */
-    #scan-instructie .marker-types {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .marker-hint {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      opacity: 0.7;
-    }
-    .marker-hint .dot {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 1.5px solid;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-    }
-    .marker-hint.context .dot { border-color: rgba(var(--aqua-rgb), 0.6); color: var(--aqua); }
-    .marker-hint.goed .dot    { border-color: #5DCAA5; color: #1D9E75; }
-    .marker-hint.slecht .dot  { border-color: #F09595; color: #A32D2D; }
-    .marker-hint span {
-      font-family: 'Cinzel', serif;
-      font-size: 8px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .marker-hint.context span { color: var(--aqua); }
-    .marker-hint.goed span    { color: #1D9E75; }
-    .marker-hint.slecht span  { color: #A32D2D; }
-
-    /* ─── Jiminy speech bubble ─── */
-    #jiminy-panel {
-      position: fixed;
-      bottom: 100px; left: 50%; transform: translateX(-50%);
-      width: min(420px, calc(100vw - 32px));
-      background: rgba(10, 12, 20, 0.92);
-      border: 1px solid rgba(var(--gold-rgb), 0.35);
-      border-radius: 2px;
-      padding: 20px 20px 18px;
-      z-index: 70;
-      pointer-events: none;
-      opacity: 0;
-      transform: translateX(-50%) translateY(20px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-    #jiminy-panel.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    #jiminy-panel::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      border-radius: 2px 0 0 2px;
-      background: var(--panel-accent, var(--gold));
-    }
-
-    /* Tail driehoek */
-    #jiminy-panel::after {
-      content: '';
-      position: absolute;
-      bottom: -8px; left: 50%; transform: translateX(-50%);
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 8px solid rgba(var(--gold-rgb), 0.35);
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .panel-avatar {
-      font-size: 28px;
-      animation: floatAvatar 3s ease-in-out infinite;
-    }
-    @keyframes floatAvatar {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
-    }
-    .panel-type {
-      font-family: 'Cinzel', serif;
-      font-size: 9px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--panel-accent, var(--gold));
-    }
-
-    #jiminy-text {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 16px;
-      line-height: 1.65;
-      color: var(--parchment-shadow);
-    }
-
-    /* ─── Portal overlay (over de camera) ─── */
-    #portal-overlay {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 65;
-      pointer-events: none;
-      opacity: 0;
+    /* ─── Loading scherm ─── */
+    #camera-loading {
+      position: fixed; inset: 0;
+      background: var(--night);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; z-index: 200;
       transition: opacity 0.6s ease;
     }
-    #portal-overlay.visible { opacity: 1; }
-
-    .portal-frame {
-      width: min(320px, 80vw);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      position: relative;
-      overflow: hidden;
-      box-shadow:
-        0 0 0 2px rgba(var(--gold-rgb), 0.6),
-        0 0 40px 10px rgba(var(--gold-rgb), 0.3),
-        0 0 80px 20px rgba(var(--gold-rgb), 0.15);
-      animation: portalAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-    @keyframes portalAppear {
-      from { transform: scale(0); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    .portal-inner {
-      width: 100%; height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 12px;
-      padding: 24px;
-      text-align: center;
-      font-size: 48px;
-    }
-
-    /* Goed: goudgloed */
-    .portal-frame.goed {
-      background: radial-gradient(ellipse at center,
-        rgba(255, 220, 100, 0.35) 0%,
-        rgba(200, 151, 58, 0.2) 40%,
-        rgba(10, 20, 10, 0.95) 100%);
-      box-shadow:
-        0 0 0 2px #5DCAA5,
-        0 0 40px 10px rgba(29, 158, 117, 0.4),
-        0 0 80px 30px rgba(29, 158, 117, 0.15);
-    }
-
-    /* Slecht: duister */
-    .portal-frame.slecht {
-      background: radial-gradient(ellipse at center,
-        rgba(80, 20, 20, 0.5) 0%,
-        rgba(40, 10, 10, 0.4) 40%,
-        rgba(5, 5, 15, 0.97) 100%);
-      box-shadow:
-        0 0 0 2px #F09595,
-        0 0 40px 10px rgba(163, 45, 45, 0.4),
-        0 0 80px 30px rgba(163, 45, 45, 0.1);
-    }
-
-    /* Particles in portal */
-    .particle {
-      position: absolute;
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: particleFloat var(--dur, 3s) ease-in-out infinite;
-      animation-delay: var(--delay, 0s);
-      opacity: 0;
-    }
-    .portal-frame.goed .particle  { background: rgba(255, 230, 120, 0.8); }
-    .portal-frame.slecht .particle { background: rgba(200, 60, 60, 0.6); }
-    @keyframes particleFloat {
-      0%   { opacity: 0; transform: translate(var(--sx, 0px), var(--sy, 10px)) scale(0.5); }
-      50%  { opacity: 0.9; }
-      100% { opacity: 0; transform: translate(var(--ex, 20px), var(--ey, -30px)) scale(1.2); }
-    }
-
-    .portal-scène-tekst {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--parchment-shadow);
-      margin-top: 8px;
-    }
-
-    /* Glow ring animatie */
-    .portal-glow-ring {
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      animation: glowRotate 4s linear infinite;
-    }
-    .portal-frame.goed .portal-glow-ring {
-      border-top-color: rgba(255, 220, 80, 0.6);
-      border-right-color: rgba(29, 158, 117, 0.4);
-    }
-    .portal-frame.slecht .portal-glow-ring {
-      border-top-color: rgba(200, 60, 60, 0.6);
-      border-right-color: rgba(100, 0, 0, 0.4);
-    }
-    @keyframes glowRotate {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
-
-    /* ─── Oordeel banner (einde sessie) ─── */
-    #oordeel-banner {
-      position: fixed;
-      top: 80px; left: 50%; transform: translateX(-50%);
-      width: min(380px, calc(100vw - 32px));
-      background: rgba(10, 12, 20, 0.96);
-      border: 1px solid rgba(var(--gold-rgb), 0.4);
-      border-top: 3px solid var(--oordeel-kleur, var(--gold));
-      border-radius: 2px;
-      padding: 20px;
-      z-index: 75;
-      opacity: 0;
-      transform: translateX(-50%) translateY(-12px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      pointer-events: none; /* wordt auto als .visible */
-      text-align: center;
-    }
-    #oordeel-banner.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-      pointer-events: all;
-    }
-    .oordeel-label {
-      font-family: 'Cinzel', serif;
-      font-size: 9px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--oordeel-kleur, var(--gold));
-      margin-bottom: 6px;
-    }
-    .oordeel-tekst {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 18px;
-      color: var(--parchment);
-      line-height: 1.5;
-    }
-
-    /* ─── Loading state ─── */
-    #camera-loading {
-      position: fixed;
-      inset: 0;
-      background: var(--night);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      z-index: 200;
-      transition: opacity 0.8s ease;
-    }
     #camera-loading.fade-out { opacity: 0; pointer-events: none; }
-
     .loading-spinner {
       width: 48px; height: 48px;
       border: 2px solid rgba(var(--gold-rgb), 0.15);
@@ -461,203 +120,328 @@
       animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-text {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 16px;
-      color: rgba(200, 212, 240, 0.6);
-    }
     .loading-title {
-      font-family: 'Cinzel', serif;
-      font-size: 20px;
-      letter-spacing: 4px;
-      color: var(--gold);
-      text-transform: uppercase;
+      font-family: 'Cinzel', serif; font-size: 20px;
+      letter-spacing: 4px; color: var(--gold); text-transform: uppercase;
+    }
+    .loading-text {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 16px; color: rgba(200, 212, 240, 0.6);
     }
 
-    /* ─── Geen camera toegang ─── */
+    /* ─── Geen camera scherm ─── */
     #geen-camera {
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background: var(--night);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
-      padding: 40px;
-      z-index: 200;
-      text-align: center;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; padding: 40px; z-index: 200; text-align: center;
     }
     #geen-camera h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 22px;
-      color: var(--gold);
-      letter-spacing: 2px;
+      font-family: 'Cinzel', serif; font-size: 22px;
+      color: var(--gold); letter-spacing: 2px;
     }
     #geen-camera p {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 17px;
-      color: rgba(200, 212, 240, 0.6);
-      max-width: 360px;
-      line-height: 1.6;
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 17px; color: rgba(200, 212, 240, 0.6);
+      max-width: 360px; line-height: 1.6;
     }
-    #geen-camera .retry-btn {
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--gold);
-      background: transparent;
+    .actie-btn {
+      font-family: 'Cinzel', serif; font-size: 11px;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold); background: transparent;
       border: 1px solid rgba(var(--gold-rgb), 0.4);
-      padding: 10px 24px;
-      cursor: pointer;
-      border-radius: 1px;
-      transition: all 0.25s;
+      padding: 10px 24px; cursor: pointer; border-radius: 1px; transition: all 0.25s;
     }
-    #geen-camera .retry-btn:hover {
-      background: var(--light-gold);
-    }
+    .actie-btn:hover { background: var(--light-gold); }
 
-    /* ─── Demo modus (desktop / geen AR camera) ─── */
-    #demo-mode {
+    /* ─── Scan knoppen onderaan (live camera modus) ─── */
+    #scan-knoppen {
       position: fixed;
-      inset: 0;
-      background: linear-gradient(135deg, var(--night) 0%, var(--deep) 100%);
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 20px 36px;
+      background: linear-gradient(transparent, rgba(10,12,20,0.92));
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
-      z-index: 10; /* Intentioneel laag: panels (65/70/75) zweven er bovenop als achtergrond */
-      overflow-y: auto;
+      gap: 16px;
+      z-index: 60;
+      pointer-events: all;
     }
 
-    #demo-mode .demo-header {
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--gold-dim);
-      margin-bottom: 8px;
+    #scan-knoppen h2 {
+      font-family: 'Cinzel', serif; font-size: 11px;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--gold);
+    }
+
+    .scan-rij {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .scan-btn {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      padding: 12px 20px;
+      border-radius: 2px; border: 1px solid;
+      background: rgba(10,12,20,0.7);
+      cursor: pointer; font-family: inherit;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      pointer-events: all;
+    }
+    .scan-btn .icoon { font-size: 22px; }
+    .scan-btn .label {
+      font-family: 'Cinzel', serif; font-size: 8px;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    .scan-btn.context {
+      border-color: rgba(var(--aqua-rgb), 0.4); color: var(--aqua);
+    }
+    .scan-btn.context:active { background: rgba(var(--aqua-rgb), 0.15); }
+
+    .scan-btn.goed {
+      border-color: rgba(29,158,117,0.4); color: #5DCAA5;
+    }
+    .scan-btn.goed:active { background: rgba(29,158,117,0.15); }
+
+    .scan-btn.slecht {
+      border-color: rgba(163,45,45,0.4); color: #F09595;
+    }
+    .scan-btn.slecht:active { background: rgba(163,45,45,0.15); }
+
+    .scan-hint {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 13px; color: rgba(200,212,240,0.45); text-align: center;
+    }
+
+    /* ─── Demo modus ─── */
+    #demo-mode {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, var(--night) 0%, var(--deep) 100%);
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 20px; z-index: 10; overflow-y: auto;
+    }
+    #demo-mode::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(54,34,77,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 70%, rgba(31,36,56,0.6) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, #0d111e 0%, #04060c 100%);
+      z-index: -1;
+    }
+    #demo-content {
+      display: flex; flex-direction: column;
+      align-items: center; width: 100%;
+    }
+    .demo-header {
+      font-family: 'Cinzel', serif; font-size: 11px;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 8px;
     }
     #demo-mode h2 {
-      font-family: 'Cinzel', serif;
-      font-size: 24px;
-      color: var(--gold);
-      letter-spacing: 2px;
-      text-align: center;
-      margin-bottom: 8px;
+      font-family: 'Cinzel', serif; font-size: 24px;
+      color: var(--gold); letter-spacing: 2px;
+      text-align: center; margin-bottom: 8px;
     }
-    #demo-mode .demo-sub {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 15px;
-      color: rgba(200, 212, 240, 0.55);
-      text-align: center;
-      margin-bottom: 32px;
-      max-width: 400px;
-      line-height: 1.5;
+    .demo-sub {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 15px; color: rgba(200,212,240,0.55);
+      text-align: center; margin-bottom: 32px;
+      max-width: 400px; line-height: 1.5;
     }
-    .demo-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      width: min(400px, 100%);
-    }
+    .demo-buttons { display: flex; flex-direction: column; gap: 12px; width: min(400px, 100%); }
     .demo-btn {
-      padding: 16px 24px;
-      border-radius: 2px;
-      cursor: pointer;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      border: 1px solid;
-      background: transparent;
-      transition: all 0.25s ease;
-      font-family: inherit;
+      padding: 16px 24px; border-radius: 2px; cursor: pointer;
+      text-align: left; display: flex; align-items: center; gap: 16px;
+      border: 1px solid; background: transparent;
+      transition: all 0.25s ease; font-family: inherit;
     }
     .demo-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
     .demo-btn .btn-titel {
-      font-family: 'Cinzel', serif;
-      font-size: 12px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 3px;
+      font-family: 'Cinzel', serif; font-size: 12px;
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px;
     }
     .demo-btn .btn-desc {
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 13px;
-      line-height: 1.4;
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 13px; line-height: 1.4;
     }
-    .demo-btn.context {
-      border-color: rgba(var(--aqua-rgb), 0.3);
-      color: var(--aqua);
-    }
-    .demo-btn.context:hover { background: rgba(var(--aqua-rgb), 0.08); border-color: rgba(var(--aqua-rgb), 0.6); }
-    .demo-btn.context .btn-desc { color: rgba(91, 200, 216, 0.7); }
-
-    .demo-btn.goed {
-      border-color: rgba(29, 158, 117, 0.3);
-      color: #1D9E75;
-    }
-    .demo-btn.goed:hover { background: rgba(29, 158, 117, 0.08); border-color: rgba(29, 158, 117, 0.6); }
-    .demo-btn.goed .btn-desc { color: rgba(29, 158, 117, 0.7); }
-
-    .demo-btn.slecht {
-      border-color: rgba(163, 45, 45, 0.3);
-      color: #c05050;
-    }
-    .demo-btn.slecht:hover { background: rgba(163, 45, 45, 0.08); border-color: rgba(163, 45, 45, 0.6); }
-    .demo-btn.slecht .btn-desc { color: rgba(163, 45, 45, 0.7); }
-
-    #demo-mode .demo-footer {
-      margin-top: 24px;
-      font-family: 'IM Fell English', serif;
-      font-style: italic;
-      font-size: 13px;
-      color: rgba(200, 212, 240, 0.3);
-      text-align: center;
+    .demo-btn.context { border-color: rgba(var(--aqua-rgb),0.3); color: var(--aqua); }
+    .demo-btn.context:hover { background: rgba(var(--aqua-rgb),0.08); }
+    .demo-btn.context .btn-desc { color: rgba(91,200,216,0.7); }
+    .demo-btn.goed { border-color: rgba(29,158,117,0.3); color: #1D9E75; }
+    .demo-btn.goed:hover { background: rgba(29,158,117,0.08); }
+    .demo-btn.goed .btn-desc { color: rgba(29,158,117,0.7); }
+    .demo-btn.slecht { border-color: rgba(163,45,45,0.3); color: #c05050; }
+    .demo-btn.slecht:hover { background: rgba(163,45,45,0.08); }
+    .demo-btn.slecht .btn-desc { color: rgba(163,45,45,0.7); }
+    .demo-footer {
+      margin-top: 24px; font-family: 'IM Fell English', serif;
+      font-style: italic; font-size: 13px;
+      color: rgba(200,212,240,0.3); text-align: center;
     }
 
-    /* Visueel simulated camera bg voor demo */
-    #demo-mode::before {
-      content: '';
+    /* ─── Jiminy panel ─── */
+    #jiminy-panel {
       position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse at 20% 30%, rgba(54, 34, 77, 0.3) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 70%, rgba(31, 36, 56, 0.6) 0%, transparent 55%),
-        radial-gradient(ellipse at 50% 50%, #0d111e 0%, #04060c 100%);
-      z-index: -1;
+      bottom: 140px; left: 50%; transform: translateX(-50%) translateY(20px);
+      width: min(420px, calc(100vw - 32px));
+      background: rgba(10,12,20,0.92);
+      border: 1px solid rgba(var(--gold-rgb),0.35);
+      border-radius: 2px; padding: 20px 20px 18px;
+      z-index: 70; pointer-events: none;
+      opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #jiminy-panel.visible {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+    #jiminy-panel::before {
+      content: ''; position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+      border-radius: 2px 0 0 2px;
+      background: var(--panel-accent, var(--gold));
+    }
+    .panel-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .panel-avatar { font-size: 28px; animation: floatAvatar 3s ease-in-out infinite; }
+    @keyframes floatAvatar {
+      0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); }
+    }
+    .panel-type {
+      font-family: 'Cinzel', serif; font-size: 9px;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--panel-accent, var(--gold));
+    }
+    #jiminy-text {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 16px; line-height: 1.65; color: var(--parchment-shadow);
+    }
+
+    /* ─── Portal overlay ─── */
+    #portal-overlay {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 65; pointer-events: none;
+      opacity: 0; transition: opacity 0.6s ease;
+    }
+    #portal-overlay.visible { opacity: 1; }
+
+    .portal-frame {
+      width: min(300px, 78vw); aspect-ratio: 1;
+      border-radius: 50%; position: relative; overflow: hidden;
+      box-shadow: 0 0 0 2px rgba(var(--gold-rgb),0.6), 0 0 40px 10px rgba(var(--gold-rgb),0.3);
+      animation: portalAppear 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes portalAppear {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .portal-frame.goed {
+      background: radial-gradient(ellipse at center, rgba(255,220,100,0.35) 0%, rgba(200,151,58,0.2) 40%, rgba(10,20,10,0.95) 100%);
+      box-shadow: 0 0 0 2px #5DCAA5, 0 0 40px 10px rgba(29,158,117,0.4);
+    }
+    .portal-frame.slecht {
+      background: radial-gradient(ellipse at center, rgba(80,20,20,0.5) 0%, rgba(40,10,10,0.4) 40%, rgba(5,5,15,0.97) 100%);
+      box-shadow: 0 0 0 2px #F09595, 0 0 40px 10px rgba(163,45,45,0.4);
+    }
+    .portal-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px; padding: 24px; text-align: center;
+    }
+    .portal-scène-tekst {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 14px; line-height: 1.5; color: var(--parchment-shadow); margin-top: 8px;
+    }
+    .portal-glow-ring {
+      position: absolute; inset: -4px; border-radius: 50%;
+      border: 2px solid transparent; animation: glowRotate 4s linear infinite;
+    }
+    .portal-frame.goed .portal-glow-ring { border-top-color: rgba(255,220,80,0.6); border-right-color: rgba(29,158,117,0.4); }
+    .portal-frame.slecht .portal-glow-ring { border-top-color: rgba(200,60,60,0.6); border-right-color: rgba(100,0,0,0.4); }
+    @keyframes glowRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .particle {
+      position: absolute; width: 4px; height: 4px;
+      border-radius: 50%; pointer-events: none;
+      animation: particleFloat var(--dur,3s) ease-in-out infinite;
+      animation-delay: var(--delay,0s); opacity: 0;
+    }
+    .portal-frame.goed .particle { background: rgba(255,230,120,0.8); }
+    .portal-frame.slecht .particle { background: rgba(200,60,60,0.6); }
+    @keyframes particleFloat {
+      0% { opacity:0; transform: translate(var(--sx,0px),var(--sy,10px)) scale(0.5); }
+      50% { opacity:0.9; }
+      100% { opacity:0; transform: translate(var(--ex,20px),var(--ey,-30px)) scale(1.2); }
+    }
+
+    /* ─── Oordeel banner ─── */
+    #oordeel-banner {
+      position: fixed;
+      top: 80px; left: 50%; transform: translateX(-50%) translateY(-12px);
+      width: min(380px, calc(100vw - 32px));
+      background: rgba(10,12,20,0.96);
+      border: 1px solid rgba(var(--gold-rgb),0.4);
+      border-top: 3px solid var(--oordeel-kleur, var(--gold));
+      border-radius: 2px; padding: 20px;
+      z-index: 75; opacity: 0;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none; text-align: center;
+    }
+    #oordeel-banner.visible {
+      opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all;
+    }
+    .oordeel-label {
+      font-family: 'Cinzel', serif; font-size: 9px;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--oordeel-kleur, var(--gold)); margin-bottom: 6px;
+    }
+    .oordeel-tekst {
+      font-family: 'IM Fell English', serif; font-style: italic;
+      font-size: 18px; color: var(--parchment); line-height: 1.5;
+    }
+    #reset-btn {
+      margin-top: 16px; font-family: 'Cinzel', serif;
+      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold-dim); background: transparent;
+      border: 1px solid rgba(var(--gold-rgb),0.2);
+      padding: 7px 18px; cursor: pointer; border-radius: 1px; transition: all 0.25s;
+    }
+    #reset-btn:hover { color: var(--gold); }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-<!-- ─── Camera loading scherm ─── -->
+<!-- Camera video (native, geen AR.js) -->
+<video id="camera-video" autoplay playsinline muted></video>
+
+<!-- Loading scherm -->
 <div id="camera-loading">
   <div class="loading-title">Jiminy's AR</div>
   <div class="loading-spinner"></div>
   <div class="loading-text">Camera initialiseren…</div>
 </div>
 
-<!-- ─── Geen camera toegang ─── -->
+<!-- Geen camera toegang -->
 <div id="geen-camera">
-  <div style="font-size: 48px;">📷</div>
+  <div style="font-size:48px">📷</div>
   <h2>Cameratoegang vereist</h2>
-  <p>Sta cameratoestemming toe om de AR-ervaring te starten. Open deze pagina opnieuw en kies "Toestaan" als het scherm verschijnt.</p>
-  <button class="retry-btn" id="retry-btn">Opnieuw proberen</button>
-  <button class="retry-btn" id="demo-from-camera-btn" style="margin-top: 8px; color: var(--gold-dim); border-color: rgba(var(--gold-rgb),0.2);">Ga naar demo-modus</button>
+  <p>Sta cameratoestemming toe en herlaad de pagina. Werkt het nog niet? Gebruik dan de demo-modus.</p>
+  <button class="actie-btn" id="retry-btn">Opnieuw proberen</button>
+  <button class="actie-btn" id="demo-from-camera-btn" style="margin-top:8px;color:var(--gold-dim);border-color:rgba(var(--gold-rgb),0.2)">Demo-modus</button>
 </div>
 
-<!-- ─── Demo modus (desktop / geen AR) ─── -->
+<!-- Demo modus -->
 <div id="demo-mode">
-  <div id="demo-content" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+  <div id="demo-content">
     <div class="demo-header">Morele Spiegel</div>
     <h2>Jiminy's AR-ervaring</h2>
     <p class="demo-sub">Kies een scantype om de AR-beleving te simuleren</p>
@@ -666,56 +450,56 @@
         <span class="btn-icon">🦗</span>
         <div class="btn-info">
           <div class="btn-titel">Context-scan</div>
-          <div class="btn-desc">Jiminy verschijnt en legt de morele context van deze entry uit</div>
+          <div class="btn-desc">Jiminy verschijnt en legt de morele context uit</div>
         </div>
       </button>
       <button class="demo-btn goed" data-trigger="goed">
         <span class="btn-icon">✨</span>
         <div class="btn-info">
           <div class="btn-titel">Goede keuze</div>
-          <div class="btn-desc">Portal opent en toont de consequentie van de moreel goede keuze</div>
+          <div class="btn-desc">Portal toont de consequentie van de moreel goede keuze</div>
         </div>
       </button>
       <button class="demo-btn slecht" data-trigger="slecht">
         <span class="btn-icon">🌑</span>
         <div class="btn-info">
           <div class="btn-titel">Slechte keuze</div>
-          <div class="btn-desc">Portal opent en toont de consequentie van de moreel slechte keuze</div>
+          <div class="btn-desc">Portal toont de consequentie van de moreel slechte keuze</div>
         </div>
       </button>
     </div>
-    <div class="demo-footer">Op een mobiel apparaat met camera werkt de volledige AR-ervaring</div>
+    <div class="demo-footer">Op mobiel met camera werkt de volledige AR-ervaring</div>
   </div>
 </div>
 
-<!-- ─── UI Overlay ─── -->
+<!-- Top balk -->
 <div id="top-bar">
-  <a href="index.html" class="back-btn">← Dagboek</a>
-  <div class="entry-label" id="entry-label">Laad entry…</div>
-  <button class="mute-btn" id="mute-btn" title="Geluid aan/uit">🔊</button>
+  <a href="index.html" class="back-btn" id="back-btn">← Dagboek</a>
+  <div class="entry-label" id="entry-label">Laden…</div>
+  <button class="mute-btn" id="mute-btn">🔊</button>
 </div>
 
-<div id="scan-instructie">
-  <div class="pulse-ring"></div>
-  <h2>Richt je camera</h2>
-  <p>Scan een van de drie plaatjes om Jiminy tot leven te wekken</p>
-  <div class="marker-types">
-    <div class="marker-hint context">
-      <div class="dot">🦗</div>
-      <span>Context</span>
-    </div>
-    <div class="marker-hint goed">
-      <div class="dot">✦</div>
-      <span>Goed</span>
-    </div>
-    <div class="marker-hint slecht">
-      <div class="dot">✕</div>
-      <span>Slecht</span>
-    </div>
+<!-- Scan knoppen (live camera modus) -->
+<div id="scan-knoppen">
+  <h2>Kies een moment</h2>
+  <div class="scan-rij">
+    <button class="scan-btn context" data-trigger="context">
+      <span class="icoon">🦗</span>
+      <span class="label">Context</span>
+    </button>
+    <button class="scan-btn goed" data-trigger="goed">
+      <span class="icoon">✦</span>
+      <span class="label">Goed</span>
+    </button>
+    <button class="scan-btn slecht" data-trigger="slecht">
+      <span class="icoon">✕</span>
+      <span class="label">Slecht</span>
+    </button>
   </div>
+  <div class="scan-hint">Richt je camera op de scène en kies een moreel moment</div>
 </div>
 
-<!-- Jiminy speech bubble -->
+<!-- Jiminy panel -->
 <div id="jiminy-panel">
   <div class="panel-header">
     <span class="panel-avatar">🦗</span>
@@ -724,12 +508,12 @@
   <div id="jiminy-text">…</div>
 </div>
 
-<!-- Portal overlay (AR simulatie) -->
+<!-- Portal overlay -->
 <div id="portal-overlay">
   <div class="portal-frame" id="portal-frame">
     <div class="portal-glow-ring"></div>
-    <div class="portal-inner" id="portal-inner">
-      <div style="font-size: 52px;" id="portal-icon">🌅</div>
+    <div class="portal-inner">
+      <div style="font-size:52px" id="portal-icon">🌅</div>
       <div class="portal-scène-tekst" id="portal-tekst"></div>
     </div>
   </div>
@@ -739,106 +523,25 @@
 <div id="oordeel-banner">
   <div class="oordeel-label" id="oordeel-label">Jiminy's oordeel</div>
   <div class="oordeel-tekst" id="oordeel-tekst"></div>
-  <button id="reset-btn" onclick="resetSessie()" style="
-    margin-top: 16px;
-    font-family: 'Cinzel', serif;
-    font-size: 9px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    background: transparent;
-    border: 1px solid rgba(var(--gold-rgb), 0.2);
-    padding: 7px 18px;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.25s;
-    pointer-events: all;
-  " onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">
-    ↩ Nieuwe scan
-  </button>
+  <button id="reset-btn">↩ Nieuwe scan</button>
 </div>
-
-<!-- ─── A-Frame AR Scene ─── -->
-<!-- Markers: HIRO = context, KANJI = goed, BARCODE 0 = slecht  -->
-<!-- Print via: https://ar-js-org.github.io/AR.js-Docs/marker-based/ -->
-<a-scene
-  id="ar-scene"
-  vr-mode-ui="enabled: false"
-  renderer="antialias: true; logarithmicDepthBuffer: false;"
-  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
->
-  <!-- CONTEXT marker: Hiro (standaard ingebouwd) -->
-  <a-marker
-    id="marker-context"
-    preset="hiro"
-    emitevents="true"
-    smooth="true"
-    smoothCount="5"
-  >
-    <a-plane
-      position="0 0 0"
-      rotation="-90 0 0"
-      width="1" height="1"
-      material="color: #5bc8d8; transparent: true; opacity: 0.85"
-    ></a-plane>
-  </a-marker>
-
-  <!-- GOED marker: Kanji (standaard ingebouwd) -->
-  <a-marker
-    id="marker-goed"
-    preset="kanji"
-    emitevents="true"
-    smooth="true"
-    smoothCount="5"
-  >
-    <a-ring
-      position="0 0.1 0"
-      rotation="-90 0 0"
-      radius-inner="0.3" radius-outer="0.4"
-      material="color: #5DCAA5; emissive: #1D9E75; emissiveIntensity: 0.6"
-      animation="property: rotation; to: -90 360 0; loop: true; dur: 3000; easing: linear"
-    ></a-ring>
-  </a-marker>
-
-  <!-- SLECHT marker: barcode 0 (3x3 matrix, geen extern bestand) -->
-  <a-marker
-    id="marker-slecht"
-    type="barcode"
-    value="0"
-    emitevents="true"
-    smooth="true"
-    smoothCount="5"
-  >
-    <a-ring
-      position="0 0.1 0"
-      rotation="-90 0 0"
-      radius-inner="0.3" radius-outer="0.4"
-      material="color: #F09595; emissive: #A32D2D; emissiveIntensity: 0.6"
-      animation="property: rotation; to: -90 360 0; loop: true; dur: 3000; easing: linear"
-    ></a-ring>
-  </a-marker>
-
-  <a-entity camera></a-entity>
-</a-scene>
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   Jiminy's AR — Hoofdlogica
+   Jiminy's AR — native camera, geen AR.js
    ═══════════════════════════════════════════════════════ */
 
-// ─── Entry configuratie ───
-// Lees entry-id uit URL-parameter, bijv.: ar.html?entry=sora-hart
-const params     = new URLSearchParams(location.search);
-const entryId    = params.get('entry') || 'sora-hart';
-const returnUrl  = params.get('terug') || 'index.html';
+// ─── Entry data ───
+const params    = new URLSearchParams(location.search);
+const entryId   = params.get('entry') || 'sora-hart';
+const returnUrl = params.get('terug') || 'index.html';
 
 const ENTRIES = {
   'sora-hart': {
     titel: 'Sora verbrijzelt zijn eigen hart',
     context: {
       tekst: 'Hier staat Sora op het punt om het onmogelijke te doen — zijn eigen hart te vernietigen uit pure liefde. Zijn geweten vecht, maar zijn hart heeft al gekozen.',
-      type: 'Morele context',
-      kleur: 'var(--aqua)',
+      type: 'Morele context', kleur: '#5bc8d8',
     },
     goed: {
       icoon: '💛',
@@ -858,8 +561,7 @@ const ENTRIES = {
     titel: 'Riku opent de deur naar duisternis',
     context: {
       tekst: 'Riku staat op de drempel. Achter hem veiligheid, voor hem duisternis — maar ook de belofte van kracht. Zijn intentie is liefde. Zijn keuze, een val.',
-      type: 'Morele context',
-      kleur: 'var(--aqua)',
+      type: 'Morele context', kleur: '#5bc8d8',
     },
     goed: {
       icoon: '🌟',
@@ -879,8 +581,7 @@ const ENTRIES = {
     titel: 'Ansem wordt verzegeld',
     context: {
       tekst: 'Achter de Deur naar Duisternis wacht verlossing — maar ook offer. Riku houdt de deur vast van binnenuit, zodat anderen kunnen leven.',
-      type: 'Morele context',
-      kleur: 'var(--aqua)',
+      type: 'Morele context', kleur: '#5bc8d8',
     },
     goed: {
       icoon: '🕯️',
@@ -898,18 +599,17 @@ const ENTRIES = {
   },
 };
 
-// Fallback als entry niet bestaat
 const entry = ENTRIES[entryId] || ENTRIES['sora-hart'];
 
 // ─── State ───
-let gemuted      = false;
-let huidigeScan  = null;
-let sessieKlaar  = false;
+let gemuted       = false;
+let sessieKlaar   = false;
 let arBeschikbaar = false;
-let speechSynth  = window.speechSynthesis;
+let speechSynth   = window.speechSynthesis;
 
 // ─── Elementen ───
 const elEntryLabel    = document.getElementById('entry-label');
+const elBackBtn       = document.getElementById('back-btn');
 const elJiminyPanel   = document.getElementById('jiminy-panel');
 const elJiminyText    = document.getElementById('jiminy-text');
 const elPanelType     = document.getElementById('panel-type');
@@ -920,29 +620,60 @@ const elPortalTekst   = document.getElementById('portal-tekst');
 const elOordeelBanner = document.getElementById('oordeel-banner');
 const elOordeelLabel  = document.getElementById('oordeel-label');
 const elOordeelTekst  = document.getElementById('oordeel-tekst');
-const elScanInstructie = document.getElementById('scan-instructie');
 const elCameraLoading = document.getElementById('camera-loading');
 const elGeenCamera    = document.getElementById('geen-camera');
 const elDemoMode      = document.getElementById('demo-mode');
-const elArScene       = document.getElementById('ar-scene');
+const elDemoContent   = document.getElementById('demo-content');
+const elScanKnoppen   = document.getElementById('scan-knoppen');
+const elVideo         = document.getElementById('camera-video');
 
-// ─── Laad entry info ───
+// ─── Init ───
 elEntryLabel.textContent = entry.titel;
-// Terug-link
-document.querySelector('.back-btn').href = returnUrl;
+elBackBtn.href = returnUrl;
 
-// ─── Detecteer AR mogelijkheden ───
-function detecteerAR() {
-  // getUserMedia vereist een beveiligde context (HTTPS of localhost)
+// ─── Camera opstarten ───
+window.addEventListener('load', () => {
   const isVeilig = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  const heeftCamera = isVeilig && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const heeftAPI = isVeilig && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
-  if (heeftCamera) {
-    startARModus();
+  if (heeftAPI) {
+    startCamera();
   } else {
     verbergLaadscherm();
     startDemoMode();
   }
+});
+
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: false
+  })
+  .then(stream => {
+    elVideo.srcObject = stream;
+    elVideo.style.display = 'block';
+    arBeschikbaar = true;
+
+    elVideo.addEventListener('loadedmetadata', () => {
+      verbergLaadscherm(() => {
+        elScanKnoppen.style.display = 'flex';
+      });
+    }, { once: true });
+
+    // Fallback als loadedmetadata niet vuurt
+    setTimeout(() => {
+      if (elCameraLoading.style.display !== 'none') {
+        verbergLaadscherm(() => {
+          elScanKnoppen.style.display = 'flex';
+        });
+      }
+    }, 4000);
+  })
+  .catch(err => {
+    console.warn('Camera fout:', err.name, err.message);
+    elCameraLoading.style.display = 'none';
+    elGeenCamera.style.display = 'flex';
+  });
 }
 
 function verbergLaadscherm(callback) {
@@ -950,294 +681,141 @@ function verbergLaadscherm(callback) {
   setTimeout(() => {
     elCameraLoading.style.display = 'none';
     if (callback) callback();
-  }, 800);
-}
-
-function startARModus() {
-  // Test of camera beschikbaar is, stop daarna de stream meteen zodat
-  // AR.js de camera zelf kan overnemen zonder conflict.
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
-    .then(stream => {
-      // Stop test-stream DIRECT — AR.js opent zijn eigen stream via zijn pipeline.
-      stream.getTracks().forEach(t => t.stop());
-
-      arBeschikbaar = true;
-
-      const onSceneLoaded = () => {
-        verbergLaadscherm();
-        koppelARMarkers();
-
-        // Extra check na 3s: als de video nog steeds zwart is (geen srcObject),
-        // toon dan alsnog een waarschuwing met demo-optie
-        setTimeout(() => {
-          const video = document.querySelector('video');
-          if (video && !video.srcObject && !video.src) {
-            toonCameraWaarschuwing();
-          }
-        }, 3000);
-      };
-
-      if (elArScene.hasLoaded) {
-        onSceneLoaded();
-      } else {
-        elArScene.addEventListener('loaded', onSceneLoaded, { once: true });
-
-        // Fallback na 10 seconden
-        setTimeout(() => {
-          if (elCameraLoading.style.display !== 'none') {
-            verbergLaadscherm();
-            koppelARMarkers();
-          }
-        }, 10000);
-      }
-    })
-    .catch(err => {
-      console.warn('Camera geblokkeerd:', err.name, err.message);
-      elCameraLoading.style.display = 'none';
-      elGeenCamera.style.display = 'flex';
-    });
-}
-
-function toonCameraWaarschuwing() {
-  // Video feed is zwart: toon een niet-storende banner met demo-optie
-  const banner = document.createElement('div');
-  banner.style.cssText = `
-    position: fixed; bottom: 160px; left: 50%; transform: translateX(-50%);
-    background: rgba(10,12,20,0.9); border: 1px solid rgba(200,151,58,0.3);
-    border-radius: 2px; padding: 12px 20px; z-index: 90;
-    font-family: 'IM Fell English', serif; font-style: italic;
-    font-size: 14px; color: rgba(200,212,240,0.7); text-align: center;
-    width: min(340px, calc(100vw - 32px));
-  `;
-  banner.innerHTML = `
-    Camera-feed niet zichtbaar?
-    <button onclick="startDemoMode()" style="
-      display: block; margin: 8px auto 0;
-      font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--gold);
-      background: transparent; border: 1px solid rgba(200,151,58,0.3);
-      padding: 6px 16px; cursor: pointer; border-radius: 1px;
-    ">Gebruik demo-modus</button>
-  `;
-  document.body.appendChild(banner);
-  setTimeout(() => banner.remove(), 8000);
+  }, 700);
 }
 
 window.startDemoMode = function() {
   elGeenCamera.style.display = 'none';
-  // Verberg AR scene volledig in demo modus (geen cameratoestemming nodig)
-  elArScene.style.display = 'none';
+  elScanKnoppen.style.display = 'none';
   elDemoMode.style.display = 'flex';
-  elScanInstructie.style.display = 'none';
-  // Reset eventuele vorige sessie UI
   elJiminyPanel.classList.remove('visible');
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
-}
+  elDemoContent.style.display = 'flex';
+};
 
-// ─── AR Marker events ───
-function koppelARMarkers() {
-  const scene = elArScene;
-
-  function bindMarkers() {
-    ['context', 'goed', 'slecht'].forEach(type => {
-      const marker = document.getElementById(`marker-${type}`);
-      if (!marker) return;
-
-      marker.addEventListener('markerFound', () => {
-        if (sessieKlaar && type !== 'context') return;
-        triggerAR(type);
-        if (navigator.vibrate) navigator.vibrate([40, 20, 40]);
-      });
-      // markerLost: intentioneel leeg gehouden voor toekomstige uitbreiding
-    });
-  }
-
-  // Als de scene al geladen is, koppel direct; anders wacht op het event.
-  if (scene.hasLoaded) {
-    bindMarkers();
-  } else {
-    scene.addEventListener('loaded', bindMarkers, { once: true });
-  }
-}
-
-// ─── Hoofd AR trigger (ook gebruikt door demo) ───
+// ─── Trigger (zowel scan-knoppen als demo) ───
 window.triggerAR = function(type) {
-  huidigeScan = type;
+  sessieKlaar = false;
 
-  if (type === 'context') {
-    toonContext();
-  } else if (type === 'goed') {
-    toonKeuze('goed');
-  } else if (type === 'slecht') {
-    toonKeuze('slecht');
-  }
+  if (type === 'context') toonContext();
+  else if (type === 'goed') toonKeuze('goed');
+  else if (type === 'slecht') toonKeuze('slecht');
 
-  // Verberg scan instructie (alleen relevant in AR modus)
-  if (arBeschikbaar) {
-    elScanInstructie.style.opacity = '0';
-    elScanInstructie.style.pointerEvents = 'none';
-  }
-}
+  // Verberg scan-knoppen tijdelijk (reset brengt ze terug)
+  elScanKnoppen.style.display = 'none';
+};
 
 function toonContext() {
   const ctx = entry.context;
-
-  // Zet kleur: als het een CSS variabele is, resolve dan naar de echte hex
-  const kleur = ctx.kleur.startsWith('var(')
-    ? getComputedStyle(document.documentElement)
-        .getPropertyValue(ctx.kleur.replace(/^var\((.+)\)$/, '$1').trim()).trim()
-    : ctx.kleur;
-
-  // Panel stijl
-  elJiminyPanel.style.setProperty('--panel-accent', kleur);
+  elJiminyPanel.style.setProperty('--panel-accent', ctx.kleur);
   elPanelType.textContent = ctx.type;
-  elPanelType.style.color = kleur;
-
-  // Toon eerst de context-tekst, daarna Jiminy's commentaar
+  elPanelType.style.color = ctx.kleur;
   elJiminyText.innerHTML =
-    `<em style="display:block; margin-bottom:10px; opacity:0.75; font-size:14px;">${ctx.tekst}</em>` +
+    `<em style="display:block;margin-bottom:10px;opacity:0.75;font-size:14px">${ctx.tekst}</em>` +
     entry.jiminy_context;
-
-  // Verberg portal (van vorige sessie)
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
-
-  // Toon jiminy panel
   elJiminyPanel.classList.add('visible');
-
-  // Audio: spreek de Jiminy-tekst (beknopter)
   spreekTekst(entry.jiminy_context);
 }
 
 function toonKeuze(type) {
   const keuze = entry[type];
-
-  // Portal
   elPortalFrame.className = `portal-frame ${type}`;
   elPortalIcon.textContent = keuze.icoon;
   elPortalTekst.textContent = keuze.scène;
 
-  // Voeg particles toe
+  // Particles
   elPortalFrame.querySelectorAll('.particle').forEach(p => p.remove());
   for (let i = 0; i < 12; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
     p.style.cssText = [
-      `left: ${20 + Math.random() * 60}%`,
-      `top: ${20 + Math.random() * 60}%`,
-      `--dur: ${(Math.random() * 2 + 2).toFixed(1)}s`,
-      `--delay: ${(Math.random() * 2).toFixed(1)}s`,
-      `--sx: ${(Math.random() * 30 - 15).toFixed(0)}px`,
-      `--sy: ${(Math.random() * 20).toFixed(0)}px`,
-      `--ex: ${(Math.random() * 60 - 30).toFixed(0)}px`,
-      `--ey: ${-(Math.random() * 60 + 20).toFixed(0)}px`,
+      `left:${20 + Math.random() * 60}%`,
+      `top:${20 + Math.random() * 60}%`,
+      `--dur:${(Math.random() * 2 + 2).toFixed(1)}s`,
+      `--delay:${(Math.random() * 2).toFixed(1)}s`,
+      `--sx:${(Math.random() * 30 - 15).toFixed(0)}px`,
+      `--sy:${(Math.random() * 20).toFixed(0)}px`,
+      `--ex:${(Math.random() * 60 - 30).toFixed(0)}px`,
+      `--ey:${-(Math.random() * 60 + 20).toFixed(0)}px`,
     ].join(';');
     elPortalFrame.insertBefore(p, elPortalFrame.firstChild);
   }
-
   elPortalOverlay.classList.add('visible');
 
-  // Jiminy reageert
-  const jiminyTekst = entry[`jiminy_${type}`];
-  const panelKleur  = type === 'goed' ? '#5DCAA5' : '#F09595';
+  const panelKleur = type === 'goed' ? '#5DCAA5' : '#F09595';
   elJiminyPanel.style.setProperty('--panel-accent', panelKleur);
   elPanelType.textContent  = type === 'goed' ? 'Goede keuze ✦' : 'Slechte keuze ✕';
   elPanelType.style.color  = panelKleur;
-  elJiminyText.textContent = jiminyTekst;
+  elJiminyText.textContent = entry[`jiminy_${type}`];
   elJiminyPanel.classList.add('visible');
+  spreekTekst(entry[`jiminy_${type}`]);
 
-  spreekTekst(jiminyTekst);
-
-  // Na delay: toon oordeel (sessie klaar)
   setTimeout(() => {
     sessieKlaar = true;
-    toonOordeel(type, keuze.oordeel);
+    const kleur = type === 'goed' ? '#5DCAA5' : '#c05050';
+    elOordeelBanner.style.setProperty('--oordeel-kleur', kleur);
+    elOordeelLabel.textContent = type === 'goed' ? '✦ Jiminy\'s oordeel' : '✕ Jiminy\'s oordeel';
+    elOordeelTekst.textContent = keuze.oordeel;
+    elOordeelBanner.classList.add('visible');
   }, 3500);
 }
 
-function toonOordeel(type, tekst) {
-  const kleur = type === 'goed' ? '#5DCAA5' : '#c05050';
-  elOordeelBanner.style.setProperty('--oordeel-kleur', kleur);
-  elOordeelLabel.textContent = type === 'goed' ? "✦ Jiminy's oordeel" : "✕ Jiminy's oordeel";
-  elOordeelTekst.textContent = tekst;
-  elOordeelBanner.classList.add('visible');
+// ─── Reset ───
+function resetSessie() {
+  sessieKlaar = false;
+  elJiminyPanel.classList.remove('visible');
+  elPortalOverlay.classList.remove('visible');
+  elOordeelBanner.classList.remove('visible');
+  speechSynth && speechSynth.cancel();
+
+  if (arBeschikbaar) {
+    elScanKnoppen.style.display = 'flex';
+  } else {
+    elDemoContent.style.display = 'flex';
+  }
 }
 
-// ─── Text-to-speech (Web Speech API) ───
+// ─── TTS ───
 function spreekTekst(tekst) {
   if (gemuted || !speechSynth) return;
   speechSynth.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(tekst);
-  utterance.lang  = 'nl-NL';
-  utterance.rate  = 0.88;
-  utterance.pitch = 1.1;
-
-  function koppelStem(u) {
-    const stemmen = speechSynth.getVoices();
-    const nlStem  = stemmen.find(v => v.lang.startsWith('nl')) || null;
-    if (nlStem) u.voice = nlStem;
+  const u = new SpeechSynthesisUtterance(tekst);
+  u.lang = 'nl-NL'; u.rate = 0.88; u.pitch = 1.1;
+  const koppel = () => {
+    const nl = speechSynth.getVoices().find(v => v.lang.startsWith('nl')) || null;
+    if (nl) u.voice = nl;
     speechSynth.speak(u);
-  }
-
-  // Chrome laadt stemmen asynchroon; als de lijst nog leeg is, wacht op voiceschanged.
-  if (speechSynth.getVoices().length > 0) {
-    koppelStem(utterance);
-  } else {
-    speechSynth.addEventListener('voiceschanged', () => koppelStem(utterance), { once: true });
-  }
+  };
+  speechSynth.getVoices().length > 0 ? koppel() : speechSynth.addEventListener('voiceschanged', koppel, { once: true });
 }
 
 window.toggleMute = function() {
   gemuted = !gemuted;
   document.getElementById('mute-btn').textContent = gemuted ? '🔇' : '🔊';
   if (gemuted) speechSynth && speechSynth.cancel();
-}
+};
 
-// ─── Event listeners (i.p.v. inline onclick) ───
+// ─── Event listeners ───
 document.getElementById('mute-btn').addEventListener('click', toggleMute);
 document.getElementById('retry-btn').addEventListener('click', () => location.reload());
 document.getElementById('demo-from-camera-btn').addEventListener('click', startDemoMode);
+document.getElementById('reset-btn').addEventListener('click', resetSessie);
+
 document.querySelectorAll('.demo-btn[data-trigger]').forEach(btn => {
   btn.addEventListener('click', () => {
-    // Verberg de knoppen maar NIET de demo-achtergrond
-    const demoContent = document.getElementById('demo-content');
-    if (demoContent) demoContent.style.display = 'none';
-    // In demo modus blijft de AR scene verborgen; portal/panel worden boven demo-bg getoond
+    elDemoContent.style.display = 'none';
     triggerAR(btn.dataset.trigger);
   });
 });
 
-// ─── Reset knop (demo: nieuwe scan simuleren) ───
-// (klik ergens op het scherm buiten panel/portal reset de beleving)
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') resetSessie();
+document.querySelectorAll('.scan-btn[data-trigger]').forEach(btn => {
+  btn.addEventListener('click', () => triggerAR(btn.dataset.trigger));
 });
 
-function resetSessie() {
-  sessieKlaar = false;
-  huidigeScan = null;
-  elJiminyPanel.classList.remove('visible');
-  elPortalOverlay.classList.remove('visible');
-  elOordeelBanner.classList.remove('visible');
-  speechSynth && speechSynth.cancel();
-
-  // In demo modus: toon knoppen opnieuw, géén scan-instructie
-  if (!arBeschikbaar) {
-    const demoContent = document.getElementById('demo-content');
-    if (demoContent) demoContent.style.display = 'flex';
-  } else {
-    // AR modus: toon scan-instructie weer
-    elScanInstructie.style.opacity = '1';
-    elScanInstructie.style.display = '';
-  }
-}
-
-// ─── Start ───
-window.addEventListener('load', () => {
-  setTimeout(detecteerAR, 600);
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') resetSessie(); });
 </script>
 </body>
 </html>
