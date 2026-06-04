@@ -318,6 +318,8 @@
     #jiminy-text {
       font-family: 'IM Fell English', serif; font-style: italic;
       font-size: 16px; line-height: 1.65; color: var(--parchment-shadow);
+      opacity: 0;
+      transition: opacity 0.6s ease;
     }
 
     /* ─── Portal overlay ─── */
@@ -602,15 +604,14 @@ const ENTRIES = {
 const entry = ENTRIES[entryId] || ENTRIES['sora-hart'];
 
 // ─── Audio bestandsmap ───
-// Verwachte bestandsnamen onder /audio/:
-//   {entryId}-context.mp3
-//   {entryId}-goed.mp3
-//   {entryId}-slecht.mp3
+// Verwachte bestandsnamen onder assets/audio/:
+//   {sora-hart}-context.wav        {sora-hart}-jiminy-context.wav
+//   {sora-hart}-goed.wav           {sora-hart}-jiminy-goed.wav
+//   {sora-hart}-slecht.wav         {sora-hart}-jiminy-slecht.wav
 //
-// Genereer deze bestanden via ElevenLabs of een andere TTS-dienst.
-// Als een bestand ontbreekt of niet laadt, valt de code terug op de
-// Web Speech API als noodoplossing.
-const AUDIO_DIR = 'audio/';
+// De accolades zijn letterlijk onderdeel van de bestandsnaam.
+// Als een bestand niet laadt, valt de code terug op de Web Speech API.
+const AUDIO_DIR = 'assets/audio/';
 
 // ─── State ───
 let gemuted         = false;
@@ -720,25 +721,37 @@ window.triggerAR = function(type) {
 
 function toonContext() {
   const ctx = entry.context;
+
+  // Stel het panel in, maar verberg de tekst totdat Jiminy uitgesproken is.
   elJiminyPanel.style.setProperty('--panel-accent', ctx.kleur);
   elPanelType.textContent = ctx.type;
   elPanelType.style.color = ctx.kleur;
+  elJiminyText.style.opacity = '0';
   elJiminyText.innerHTML =
     `<em style="display:block;margin-bottom:10px;opacity:0.75;font-size:14px">${ctx.tekst}</em>` +
     entry.jiminy_context;
+
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
   elJiminyPanel.classList.add('visible');
-  spreekTekst(entry.jiminy_context, 'context');
+
+  // 1. Speel de context-audio af, daarna de jiminy-stem.
+  // Tekst fadet in zodra de jiminy-audio start.
+  speelAudioKeten(
+    [audioPad('context'), audioPad('jiminy-context')],
+    /*onJiminyStart=*/ () => fadeInTekst(elJiminyText),
+    /*fallbackTekst=*/ entry.jiminy_context
+  );
 }
 
 function toonKeuze(type) {
   const keuze = entry[type];
+
+  // Portal opbouwen
   elPortalFrame.className = `portal-frame ${type}`;
   elPortalIcon.textContent = keuze.icoon;
   elPortalTekst.textContent = keuze.scène;
 
-  // Particles
   elPortalFrame.querySelectorAll('.particle').forEach(p => p.remove());
   for (let i = 0; i < 12; i++) {
     const p = document.createElement('div');
@@ -757,22 +770,33 @@ function toonKeuze(type) {
   }
   elPortalOverlay.classList.add('visible');
 
+  // Jiminy-panel klaarzetten, tekst nog verborgen
   const panelKleur = type === 'goed' ? '#5DCAA5' : '#F09595';
   elJiminyPanel.style.setProperty('--panel-accent', panelKleur);
-  elPanelType.textContent  = type === 'goed' ? 'Goede keuze ✦' : 'Slechte keuze ✕';
-  elPanelType.style.color  = panelKleur;
+  elPanelType.textContent = type === 'goed' ? 'Goede keuze ✦' : 'Slechte keuze ✕';
+  elPanelType.style.color = panelKleur;
+  elJiminyText.style.opacity = '0';
   elJiminyText.textContent = entry[`jiminy_${type}`];
   elJiminyPanel.classList.add('visible');
-  spreekTekst(entry[`jiminy_${type}`], type);
 
-  setTimeout(() => {
-    sessieKlaar = true;
-    const kleur = type === 'goed' ? '#5DCAA5' : '#c05050';
-    elOordeelBanner.style.setProperty('--oordeel-kleur', kleur);
-    elOordeelLabel.textContent = type === 'goed' ? '✦ Jiminy\'s oordeel' : '✕ Jiminy\'s oordeel';
-    elOordeelTekst.textContent = keuze.oordeel;
-    elOordeelBanner.classList.add('visible');
-  }, 3500);
+  // 1. Speel de scène-audio, daarna de jiminy-stem.
+  // Tekst fadet in als de jiminy-audio begint.
+  // Oordeel verschijnt nadat de jiminy-audio klaar is.
+  speelAudioKeten(
+    [audioPad(type), audioPad(`jiminy-${type}`)],
+    /*onJiminyStart=*/ () => fadeInTekst(elJiminyText),
+    /*fallbackTekst=*/ entry[`jiminy_${type}`],
+    /*onAllesKlaar=*/  () => toonOordeel(type, keuze)
+  );
+}
+
+function toonOordeel(type, keuze) {
+  sessieKlaar = true;
+  const kleur = type === 'goed' ? '#5DCAA5' : '#c05050';
+  elOordeelBanner.style.setProperty('--oordeel-kleur', kleur);
+  elOordeelLabel.textContent = type === 'goed' ? '✦ Jiminy\'s oordeel' : '✕ Jiminy\'s oordeel';
+  elOordeelTekst.textContent = keuze.oordeel;
+  elOordeelBanner.classList.add('visible');
 }
 
 // ─── Reset ───
@@ -781,6 +805,7 @@ function resetSessie() {
   elJiminyPanel.classList.remove('visible');
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
+  elJiminyText.style.opacity = '0';
   stopAudio();
 
   if (arBeschikbaar) {
@@ -791,6 +816,8 @@ function resetSessie() {
 }
 
 // ─── Audio afspelen ───
+
+// Stopt het huidige audio-object en annuleert eventuele TTS.
 function stopAudio() {
   if (huidigAudio) {
     huidigAudio.pause();
@@ -800,71 +827,92 @@ function stopAudio() {
   speechSynth && speechSynth.cancel();
 }
 
-// Speelt een audio-bestand af op basis van entryId en type ('context' | 'goed' | 'slecht').
-// Valt terug op Web Speech API als het bestand niet beschikbaar is.
-function spreekTekst(tekst, type) {
-  if (gemuted) return;
+// Bouwt een audiopad op vanuit AUDIO_DIR.
+// Conventie: assets/audio/{sora-hart}-context.wav
+//            assets/audio/{sora-hart}-jiminy-context.wav
+function audioPad(type) {
+  return `${AUDIO_DIR}{${entryId}}-${type}.wav`;
+}
+
+// Fadet een element zichtbaar in via de opacity.
+function fadeInTekst(el) {
+  el.style.transition = 'opacity 0.6s ease';
+  el.style.opacity = '1';
+}
+
+// Speelt een keten van audiopaden na elkaar af.
+//   paden[]        — te spelen bestanden op volgorde
+//   onJiminyStart  — callback als het LAATSTE bestand start (Jiminy's stem)
+//   fallbackTekst  — tekst voor Web Speech API als een bestand ontbreekt
+//   onAllesKlaar   — optionele callback nadat de hele keten klaar is
+function speelAudioKeten(paden, onJiminyStart, fallbackTekst, onAllesKlaar) {
+  if (gemuted) {
+    onJiminyStart && onJiminyStart();
+    onAllesKlaar  && onAllesKlaar();
+    return;
+  }
   stopAudio();
 
-  // We proberen jouw bestandsstructuur: wav + (mogelijk) `{entryId}` + `jiminy-` prefix.
-  // Verwacht:
-  // - /audio/{entryId}-jiminy-{context|goed|slecht}.wav
-  // - /audio/{entryId}-jiminy-{context|goed|slecht}.mp3 (fallback indien aanwezig)
-  // - /audio/entryId-jiminy-{context|goed|slecht}.wav
-  // (en als laatste poging zonder `jiminy-` prefix)
-  const candidates = [
-    `${AUDIO_DIR}{${entryId}}-jiminy-${type}.wav`,
-    `${AUDIO_DIR}{${entryId}}-jiminy-${type}.mp3`,
-    `${AUDIO_DIR}${entryId}-jiminy-${type}.wav`,
-    `${AUDIO_DIR}${entryId}-jiminy-${type}.mp3`,
-
-    `${AUDIO_DIR}{${entryId}}-${type}.wav`,
-    `${AUDIO_DIR}{${entryId}}-${type}.mp3`,
-    `${AUDIO_DIR}${entryId}-${type}.wav`,
-    `${AUDIO_DIR}${entryId}-${type}.mp3`,
-  ];
-
-  let geprobeerd = false;
-
-  const tryNext = (index) => {
-    if (index >= candidates.length) {
-      if (!probeerd) return;
-      spreekTekstFallback(tekst);
+  const speelIndex = (i) => {
+    if (i >= paden.length) {
+      onAllesKlaar && onAllesKlaar();
       return;
     }
 
-    const pad = candidates[index];
-    geprobeerd = true;
-
+    const isLaatste = i === paden.length - 1;
+    const pad = paden[i];
     const audio = new Audio(pad);
 
     audio.addEventListener('canplaythrough', () => {
       huidigAudio = audio;
-      audio.play().catch(() => spreekTekstFallback(tekst));
+      if (isLaatste) onJiminyStart && onJiminyStart();
+
+      audio.play().catch(err => {
+        console.warn('Audio afspelen mislukt:', err);
+        // Sla slechte audio over en ga door met de keten
+        speelIndex(i + 1);
+      });
+    }, { once: true });
+
+    audio.addEventListener('ended', () => {
+      huidigAudio = null;
+      speelIndex(i + 1);
     }, { once: true });
 
     audio.addEventListener('error', () => {
-      console.warn(`Audio niet gevonden: ${pad} — probeer volgende kandidaat`);
-      tryNext(index + 1);
+      console.warn(`Audiobestand niet gevonden: ${pad} — overgeslagen`);
+      // Als het het laatste bestand is, val dan terug op TTS
+      if (isLaatste) {
+        onJiminyStart && onJiminyStart();
+        spreekTekstFallback(fallbackTekst, onAllesKlaar);
+      } else {
+        speelIndex(i + 1);
+      }
     }, { once: true });
 
     audio.load();
   };
 
-  tryNext(0);
+  speelIndex(0);
 }
 
-
-// Noodoplossing: browser TTS als MP3 ontbreekt
-function spreekTekstFallback(tekst) {
-  if (gemuted || !speechSynth) return;
+// Noodoplossing: browser TTS als MP3 ontbreekt.
+// Roept onKlaar aan zodra de utterance afgelopen is.
+function spreekTekstFallback(tekst, onKlaar) {
+  if (gemuted || !speechSynth) {
+    onKlaar && onKlaar();
+    return;
+  }
   const u = new SpeechSynthesisUtterance(tekst);
   u.lang = 'nl-NL'; u.rate = 0.88; u.pitch = 1.1;
+  u.onend = () => onKlaar && onKlaar();
+
   const koppel = () => {
     const nl = speechSynth.getVoices().find(v => v.lang.startsWith('nl')) || null;
     if (nl) u.voice = nl;
     speechSynth.speak(u);
   };
+
   speechSynth.getVoices().length > 0
     ? koppel()
     : speechSynth.addEventListener('voiceschanged', koppel, { once: true });
