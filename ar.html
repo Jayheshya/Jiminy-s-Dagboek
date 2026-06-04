@@ -550,7 +550,7 @@ const ENTRIES = {
     },
     slecht: {
       icoon: '🌑',
-      scène: 'Sora aarzelt. De harten blijven gevangen. Duisternis vult de kamer. Kairi strekt haar hand uit — tevergeefs.',
+      scène: 'Sora aarzelt. De harten blijven gevangen. Duisternis vult de kamer. Kairi strekt haar hand uit —   tevergeefs.',
       oordeel: '"Zelfs een fractie van twijfel kost soms alles. Ik heb het gezien."',
     },
     jiminy_context: 'Hij deed het zonder aarzelen. Dreef het zwaard in zijn eigen borst om de harten binnenin te bevrijden, inclusief dat van Kairi.',
@@ -601,11 +601,23 @@ const ENTRIES = {
 
 const entry = ENTRIES[entryId] || ENTRIES['sora-hart'];
 
+// ─── Audio bestandsmap ───
+// Verwachte bestandsnamen onder /audio/:
+//   {entryId}-context.mp3
+//   {entryId}-goed.mp3
+//   {entryId}-slecht.mp3
+//
+// Genereer deze bestanden via ElevenLabs of een andere TTS-dienst.
+// Als een bestand ontbreekt of niet laadt, valt de code terug op de
+// Web Speech API als noodoplossing.
+const AUDIO_DIR = 'audio/';
+
 // ─── State ───
-let gemuted       = false;
-let sessieKlaar   = false;
-let arBeschikbaar = false;
-let speechSynth   = window.speechSynthesis;
+let gemuted         = false;
+let sessieKlaar     = false;
+let arBeschikbaar   = false;
+let huidigAudio     = null;   // actief Audio-object
+let speechSynth     = window.speechSynthesis;
 
 // ─── Elementen ───
 const elEntryLabel    = document.getElementById('entry-label');
@@ -717,7 +729,7 @@ function toonContext() {
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
   elJiminyPanel.classList.add('visible');
-  spreekTekst(entry.jiminy_context);
+  spreekTekst(entry.jiminy_context, 'context');
 }
 
 function toonKeuze(type) {
@@ -751,7 +763,7 @@ function toonKeuze(type) {
   elPanelType.style.color  = panelKleur;
   elJiminyText.textContent = entry[`jiminy_${type}`];
   elJiminyPanel.classList.add('visible');
-  spreekTekst(entry[`jiminy_${type}`]);
+  spreekTekst(entry[`jiminy_${type}`], type);
 
   setTimeout(() => {
     sessieKlaar = true;
@@ -769,7 +781,7 @@ function resetSessie() {
   elJiminyPanel.classList.remove('visible');
   elPortalOverlay.classList.remove('visible');
   elOordeelBanner.classList.remove('visible');
-  speechSynth && speechSynth.cancel();
+  stopAudio();
 
   if (arBeschikbaar) {
     elScanKnoppen.style.display = 'flex';
@@ -778,10 +790,74 @@ function resetSessie() {
   }
 }
 
-// ─── TTS ───
-function spreekTekst(tekst) {
+// ─── Audio afspelen ───
+function stopAudio() {
+  if (huidigAudio) {
+    huidigAudio.pause();
+    huidigAudio.currentTime = 0;
+    huidigAudio = null;
+  }
+  speechSynth && speechSynth.cancel();
+}
+
+// Speelt een audio-bestand af op basis van entryId en type ('context' | 'goed' | 'slecht').
+// Valt terug op Web Speech API als het bestand niet beschikbaar is.
+function spreekTekst(tekst, type) {
+  if (gemuted) return;
+  stopAudio();
+
+  // We proberen jouw bestandsstructuur: wav + (mogelijk) `{entryId}` + `jiminy-` prefix.
+  // Verwacht:
+  // - /audio/{entryId}-jiminy-{context|goed|slecht}.wav
+  // - /audio/{entryId}-jiminy-{context|goed|slecht}.mp3 (fallback indien aanwezig)
+  // - /audio/entryId-jiminy-{context|goed|slecht}.wav
+  // (en als laatste poging zonder `jiminy-` prefix)
+  const candidates = [
+    `${AUDIO_DIR}{${entryId}}-jiminy-${type}.wav`,
+    `${AUDIO_DIR}{${entryId}}-jiminy-${type}.mp3`,
+    `${AUDIO_DIR}${entryId}-jiminy-${type}.wav`,
+    `${AUDIO_DIR}${entryId}-jiminy-${type}.mp3`,
+
+    `${AUDIO_DIR}{${entryId}}-${type}.wav`,
+    `${AUDIO_DIR}{${entryId}}-${type}.mp3`,
+    `${AUDIO_DIR}${entryId}-${type}.wav`,
+    `${AUDIO_DIR}${entryId}-${type}.mp3`,
+  ];
+
+  let geprobeerd = false;
+
+  const tryNext = (index) => {
+    if (index >= candidates.length) {
+      if (!probeerd) return;
+      spreekTekstFallback(tekst);
+      return;
+    }
+
+    const pad = candidates[index];
+    geprobeerd = true;
+
+    const audio = new Audio(pad);
+
+    audio.addEventListener('canplaythrough', () => {
+      huidigAudio = audio;
+      audio.play().catch(() => spreekTekstFallback(tekst));
+    }, { once: true });
+
+    audio.addEventListener('error', () => {
+      console.warn(`Audio niet gevonden: ${pad} — probeer volgende kandidaat`);
+      tryNext(index + 1);
+    }, { once: true });
+
+    audio.load();
+  };
+
+  tryNext(0);
+}
+
+
+// Noodoplossing: browser TTS als MP3 ontbreekt
+function spreekTekstFallback(tekst) {
   if (gemuted || !speechSynth) return;
-  speechSynth.cancel();
   const u = new SpeechSynthesisUtterance(tekst);
   u.lang = 'nl-NL'; u.rate = 0.88; u.pitch = 1.1;
   const koppel = () => {
@@ -789,13 +865,15 @@ function spreekTekst(tekst) {
     if (nl) u.voice = nl;
     speechSynth.speak(u);
   };
-  speechSynth.getVoices().length > 0 ? koppel() : speechSynth.addEventListener('voiceschanged', koppel, { once: true });
+  speechSynth.getVoices().length > 0
+    ? koppel()
+    : speechSynth.addEventListener('voiceschanged', koppel, { once: true });
 }
 
 window.toggleMute = function() {
   gemuted = !gemuted;
   document.getElementById('mute-btn').textContent = gemuted ? '🔇' : '🔊';
-  if (gemuted) speechSynth && speechSynth.cancel();
+  if (gemuted) stopAudio();
 };
 
 // ─── Event listeners ───
