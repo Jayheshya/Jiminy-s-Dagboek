@@ -473,6 +473,41 @@
 </footer>
 
 <script>
+  // ─── AMBIENT AUDIO ───
+  const ambientAudio = new Audio('assets/audio/ambient-home.mp3');
+  ambientAudio.loop = true;
+  ambientAudio.volume = 0;
+
+  function startAmbient() {
+    ambientAudio.play().then(() => {
+      // Fade in naar volume 0.22 over 3 seconden
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol = Math.min(vol + 0.01, 0.22);
+        ambientAudio.volume = vol;
+        if (vol >= 0.22) clearInterval(fadeIn);
+      }, 135);
+    }).catch(() => {});
+    document.removeEventListener('click', startAmbient);
+    document.removeEventListener('keydown', startAmbient);
+    document.removeEventListener('touchstart', startAmbient);
+  }
+
+  // Probeer direct te starten; browsers blokkeren dit totdat gebruiker iets doet
+  ambientAudio.play().then(() => {
+    let vol = 0;
+    const fadeIn = setInterval(() => {
+      vol = Math.min(vol + 0.01, 0.22);
+      ambientAudio.volume = vol;
+      if (vol >= 0.22) clearInterval(fadeIn);
+    }, 135);
+  }).catch(() => {
+    // Autoplay geblokkeerd: wacht op eerste interactie
+    document.addEventListener('click', startAmbient, { once: true });
+    document.addEventListener('keydown', startAmbient, { once: true });
+    document.addEventListener('touchstart', startAmbient, { once: true });
+  });
+
   // ─── STERRENVELD ───
   const starsEl = document.getElementById('stars');
   const fragment = document.createDocumentFragment();

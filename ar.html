@@ -613,6 +613,28 @@ const entry = ENTRIES[entryId] || ENTRIES['sora-hart'];
 // Als een bestand niet laadt, valt de code terug op de Web Speech API.
 const AUDIO_DIR = 'assets/audio/';
 
+// ─── AMBIENT AUDIO (AR) ───
+const ambientAR = new Audio('assets/audio/ambient-ar.mp3');
+ambientAR.loop = true;
+ambientAR.volume = 0;
+
+function startAmbientAR() {
+  ambientAR.play().then(() => {
+    fadeAmbient(0.18);
+  }).catch(() => {});
+}
+
+function fadeAmbient(target, duur = 2000) {
+  const stap = (target - ambientAR.volume) / (duur / 50);
+  const iv = setInterval(() => {
+    ambientAR.volume = Math.max(0, Math.min(0.35, ambientAR.volume + stap));
+    if (Math.abs(ambientAR.volume - target) < 0.01) {
+      ambientAR.volume = target;
+      clearInterval(iv);
+    }
+  }, 50);
+}
+
 // ─── State ───
 let gemuted         = false;
 let sessieKlaar     = false;
@@ -670,6 +692,7 @@ function startCamera() {
     elVideo.addEventListener('loadedmetadata', () => {
       verbergLaadscherm(() => {
         elScanKnoppen.style.display = 'flex';
+        startAmbientAR();
       });
     }, { once: true });
 
@@ -698,6 +721,7 @@ function verbergLaadscherm(callback) {
 }
 
 window.startDemoMode = function() {
+  startAmbientAR();
   elGeenCamera.style.display = 'none';
   elScanKnoppen.style.display = 'none';
   elDemoMode.style.display = 'flex';
@@ -825,6 +849,7 @@ function stopAudio() {
     huidigAudio = null;
   }
   speechSynth && speechSynth.cancel();
+  fadeAmbient(0.18, 1000);
 }
 
 // Bouwt een audiopad op vanuit AUDIO_DIR.
@@ -852,9 +877,12 @@ function speelAudioKeten(paden, onJiminyStart, fallbackTekst, onAllesKlaar) {
     return;
   }
   stopAudio();
+  // Dim ambient tijdens AR-audio
+  fadeAmbient(0.04, 600);
 
   const speelIndex = (i) => {
     if (i >= paden.length) {
+      fadeAmbient(0.18, 1500); // herstel ambient na AR-audio
       onAllesKlaar && onAllesKlaar();
       return;
     }
@@ -905,7 +933,10 @@ function spreekTekstFallback(tekst, onKlaar) {
   }
   const u = new SpeechSynthesisUtterance(tekst);
   u.lang = 'nl-NL'; u.rate = 0.88; u.pitch = 1.1;
-  u.onend = () => onKlaar && onKlaar();
+  u.onend = () => {
+    fadeAmbient(0.18, 1500);
+    onKlaar && onKlaar();
+  };
 
   const koppel = () => {
     const nl = speechSynth.getVoices().find(v => v.lang.startsWith('nl')) || null;
@@ -921,7 +952,12 @@ function spreekTekstFallback(tekst, onKlaar) {
 window.toggleMute = function() {
   gemuted = !gemuted;
   document.getElementById('mute-btn').textContent = gemuted ? '🔇' : '🔊';
-  if (gemuted) stopAudio();
+  if (gemuted) {
+    stopAudio();
+    fadeAmbient(0, 400);
+  } else {
+    fadeAmbient(0.18, 800);
+  }
 };
 
 // ─── Event listeners ───
