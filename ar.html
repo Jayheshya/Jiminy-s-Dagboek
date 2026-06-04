@@ -794,23 +794,20 @@ function toonKeuze(type) {
   }
   elPortalOverlay.classList.add('visible');
 
-  // Jiminy-panel klaarzetten, tekst nog verborgen
+  // Jiminy-panel klaarzetten, maar nog verborgen — verschijnt pas als Jiminy begint
   const panelKleur = type === 'goed' ? '#5DCAA5' : '#F09595';
   elJiminyPanel.style.setProperty('--panel-accent', panelKleur);
   elPanelType.textContent = type === 'goed' ? 'Goede keuze ✦' : 'Slechte keuze ✕';
   elPanelType.style.color = panelKleur;
   elJiminyText.style.opacity = '0';
   elJiminyText.textContent = entry[`jiminy_${type}`];
-  elJiminyPanel.classList.add('visible');
 
   // 1. Speel de scène-audio, daarna de jiminy-stem.
-  // Tekst fadet in als de jiminy-audio begint.
-  // Oordeel verschijnt nadat de jiminy-audio klaar is.
+  // Panel, tekst én oordeel verschijnen allemaal synchroon als Jiminy begint.
   speelAudioKeten(
     [audioPad(type), audioPad(`jiminy-${type}`)],
-    /*onJiminyStart=*/ () => fadeInTekst(elJiminyText),
-    /*fallbackTekst=*/ entry[`jiminy_${type}`],
-    /*onAllesKlaar=*/  () => toonOordeel(type, keuze)
+    /*onJiminyStart=*/ () => { elJiminyPanel.classList.add('visible'); fadeInTekst(elJiminyText); toonOordeel(type, keuze); },
+    /*fallbackTekst=*/ entry[`jiminy_${type}`]
   );
 }
 
@@ -893,13 +890,22 @@ function speelAudioKeten(paden, onJiminyStart, fallbackTekst, onAllesKlaar) {
 
     audio.addEventListener('canplaythrough', () => {
       huidigAudio = audio;
-      if (isLaatste) onJiminyStart && onJiminyStart();
 
-      audio.play().catch(err => {
-        console.warn('Audio afspelen mislukt:', err);
-        // Sla slechte audio over en ga door met de keten
-        speelIndex(i + 1);
-      });
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Audio speelt nu echt — toon tekst/oordeel synchroon met het geluid
+            if (isLaatste) onJiminyStart && onJiminyStart();
+          })
+          .catch(err => {
+            console.warn('Audio afspelen mislukt:', err);
+            speelIndex(i + 1);
+          });
+      } else {
+        // Oudere browser zonder Promise-terugkoppeling
+        if (isLaatste) onJiminyStart && onJiminyStart();
+      }
     }, { once: true });
 
     audio.addEventListener('ended', () => {
