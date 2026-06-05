@@ -438,6 +438,94 @@
       border-color: var(--gold);
     }
 
+    /* ─── KLEURENPALET SWATCHES ─── */
+    .color-palette {
+      margin-top: 32px;
+    }
+
+    .color-group-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin: 28px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(var(--gold-rgb), 0.12);
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .swatch-block {
+      width: 80px;
+      height: 80px;
+      border-radius: 2px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: default;
+    }
+
+    .swatch-block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    .swatch-name {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--parchment);
+      text-align: center;
+    }
+
+    .swatch-hex {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 13px;
+      color: rgba(200, 212, 240, 0.45);
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    /* Moreel verloop */
+    .moreel-gradient-wrap {
+      margin-top: 4px;
+    }
+
+    .moreel-gradient-bar {
+      height: 28px;
+      border-radius: 2px;
+      background: linear-gradient(
+        to right,
+        #5bc8d8,
+        #a07cc8,
+        #c8973a,
+        #8a2020
+      );
+      position: relative;
+    }
+
+    .moreel-gradient-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(200, 212, 240, 0.4);
+    }
+
   </style>
 </head>
 <body>
@@ -592,6 +680,85 @@
         <td>Koud → warm: licht naar duisternis</td>
       </tr>
     </table>
+
+    <!-- Kleurenswatches -->
+    <div class="color-palette">
+      <div class="color-group-label">Achtergronden</div>
+      <div class="color-swatches">
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#0a0c14; border: 1px solid rgba(255,255,255,0.08);"></div>
+          <div class="swatch-name">Night</div>
+          <div class="swatch-hex">#0a0c14</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#0f1220; border: 1px solid rgba(255,255,255,0.08);"></div>
+          <div class="swatch-name">Deep</div>
+          <div class="swatch-hex">#0f1220</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#141828; border: 1px solid rgba(255,255,255,0.08);"></div>
+          <div class="swatch-name">Midnight</div>
+          <div class="swatch-hex">#141828</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#3d1f5e;"></div>
+          <div class="swatch-name">Heartless</div>
+          <div class="swatch-hex">#3d1f5e</div>
+        </div>
+      </div>
+
+      <div class="color-group-label">Accenten</div>
+      <div class="color-swatches">
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#c8973a;"></div>
+          <div class="swatch-name">Gold</div>
+          <div class="swatch-hex">#c8973a</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#8a6520;"></div>
+          <div class="swatch-name">Gold Dim</div>
+          <div class="swatch-hex">#8a6520</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#a07cc8;"></div>
+          <div class="swatch-name">Violet</div>
+          <div class="swatch-hex">#a07cc8</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#5bc8d8;"></div>
+          <div class="swatch-name">Aqua</div>
+          <div class="swatch-hex">#5bc8d8</div>
+        </div>
+      </div>
+
+      <div class="color-group-label">Tekst</div>
+      <div class="color-swatches">
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#f5ead0;"></div>
+          <div class="swatch-name">Parchment</div>
+          <div class="swatch-hex">#f5ead0</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#c9b48a;"></div>
+          <div class="swatch-name">Parchment Shadow</div>
+          <div class="swatch-hex">#c9b48a</div>
+        </div>
+        <div class="color-swatch">
+          <div class="swatch-block" style="background:#c8d4f0;"></div>
+          <div class="swatch-name">Starlight</div>
+          <div class="swatch-hex">#c8d4f0</div>
+        </div>
+      </div>
+
+      <div class="color-group-label">Moreel gewicht — verloop</div>
+      <div class="moreel-gradient-wrap">
+        <div class="moreel-gradient-bar"></div>
+        <div class="moreel-gradient-labels">
+          <span>Licht</span>
+          <span>Duisternis</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ── IV. TYPOGRAFIE ── -->
