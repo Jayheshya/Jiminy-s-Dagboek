@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eindoplevering DP12 — Jiminy's Dagboek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stijl.css">
+  <style>
+
+    /* ─── DOCUMENTATIE LAYOUT ─── */
+    .doc-container {
+      position: relative;
+      z-index: 10;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 120px 24px 100px;
+    }
+
+    /* ─── DOC HEADER ─── */
+    .doc-header {
+      text-align: center;
+      margin-bottom: 70px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .doc-header-deco {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .doc-header h1 {
+      font-size: clamp(32px, 6vw, 56px);
+      text-shadow:
+        0 0 60px rgba(var(--gold-rgb), 0.3),
+        0 0 120px rgba(var(--gold-rgb), 0.1);
+    }
+
+    .doc-header .header-rule {
+      margin: 24px auto;
+    }
+
+    .doc-header p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: rgba(200, 212, 240, 0.6);
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    /* ─── SECTIES ─── */
+    .doc-section {
+      margin-bottom: 64px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .doc-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .doc-section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 6px;
+    }
+
+    .doc-section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 600;
+      color: var(--parchment);
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(var(--gold-rgb), 0.2);
+    }
+
+    .doc-section h3 {
+      font-family: 'IM Fell English', serif;
+      font-size: 22px;
+      color: var(--gold);
+      margin: 32px 0 12px;
+    }
+
+    .doc-section p {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.8;
+      color: rgba(200, 212, 240, 0.75);
+      margin-bottom: 14px;
+    }
+
+    .doc-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 20px;
+    }
+
+    .doc-section ul li {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(200, 212, 240, 0.7);
+      padding: 5px 0 5px 22px;
+      position: relative;
+    }
+
+    .doc-section ul li::before {
+      content: '·';
+      position: absolute;
+      left: 6px;
+      color: var(--gold);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    /* ─── TABEL ─── */
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: 'Crimson Pro', serif;
+      font-size: 16px;
+    }
+
+    .doc-table th {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(var(--gold-rgb), 0.3);
+      background: rgba(var(--gold-rgb), 0.05);
+    }
+
+    .doc-table td {
+      padding: 12px 16px;
+      color: rgba(200, 212, 240, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    .doc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .doc-table td:first-child {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--parchment);
+      white-space: nowrap;
+    }
+
+    /* ─── GECITEERD BLOK ─── */
+    .doc-quote {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 20px;
+      line-height: 1.7;
+      color: var(--parchment-shadow);
+      padding: 20px 24px;
+      background: rgba(var(--gold-rgb), 0.05);
+      border: 1px solid rgba(var(--gold-rgb), 0.12);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 2px 2px 0;
+      margin: 20px 0;
+    }
+
+    /* ─── AR HIGHLIGHT ─── */
+    .ar-highlight {
+      border: 1px solid rgba(var(--violet-rgb), 0.3);
+      border-radius: 2px;
+      padding: 24px 28px;
+      background: rgba(var(--violet-rgb), 0.05);
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .ar-highlight::before {
+      content: 'AR COMPONENT';
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--violet);
+      position: absolute;
+      top: -8px;
+      left: 16px;
+      background: var(--night);
+      padding: 0 8px;
+    }
+
+    .ar-highlight p {
+      color: rgba(200, 212, 240, 0.75);
+    }
+
+    /* ─── ITERATIE FASE ─── */
+    .fase-block {
+      border: 1px solid rgba(var(--gold-rgb), 0.15);
+      border-radius: 2px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      background: rgba(255, 255, 255, 0.02);
+      position: relative;
+    }
+
+    .fase-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 10px;
+    }
+
+    .fase-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 19px;
+      color: var(--parchment);
+      margin-bottom: 10px;
+    }
+
+    /* ─── ETHISCHE STAP ─── */
+    .ethics-step {
+      border-left: 2px solid rgba(var(--gold-rgb), 0.25);
+      padding-left: 20px;
+      margin: 28px 0;
+    }
+
+    .ethics-step-num {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 4px;
+    }
+
+    .ethics-step h4 {
+      font-family: 'IM Fell English', serif;
+      font-size: 19px;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    /* ─── MOREEL DILEMMA ─── */
+    .dilemma-block {
+      border: 1px solid rgba(var(--aqua-rgb), 0.25);
+      border-radius: 2px;
+      padding: 24px 28px;
+      background: rgba(var(--aqua-rgb), 0.04);
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .dilemma-block::before {
+      content: 'MOREEL DILEMMA';
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--aqua);
+      position: absolute;
+      top: -8px;
+      left: 16px;
+      background: var(--night);
+      padding: 0 8px;
+    }
+
+    .dilemma-block p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--parchment-shadow);
+      line-height: 1.7;
+    }
+
+    /* ─── BEOORDELINGSMATRIX ─── */
+    .matrix-item {
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .matrix-item:last-child {
+      border-bottom: none;
+    }
+
+    .matrix-criterium {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .matrix-text {
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: rgba(200, 212, 240, 0.7);
+    }
+
+    /* ─── OPLEVERINGSTABEL STATUS BADGE ─── */
+    .status-badge {
+      display: inline-block;
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .status-ingeleverd {
+      color: var(--aqua);
+      border: 1px solid rgba(var(--aqua-rgb), 0.4);
+      background: rgba(var(--aqua-rgb), 0.07);
+    }
+
+    .status-pending {
+      color: var(--gold);
+      border: 1px solid rgba(var(--gold-rgb), 0.4);
+      background: rgba(var(--gold-rgb), 0.07);
+    }
+
+    /* ─── INHOUDSOPGAVE ─── */
+    .toc {
+      border: 1px solid rgba(var(--gold-rgb), 0.2);
+      border-radius: 2px;
+      padding: 24px 28px;
+      background: rgba(10, 12, 20, 0.4);
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.6s forwards;
+    }
+
+    .toc-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 16px;
+    }
+
+    .toc ol {
+      list-style: none;
+      padding: 0;
+      counter-reset: toc;
+    }
+
+    .toc ol li {
+      counter-increment: toc;
+      font-family: 'IM Fell English', serif;
+      font-size: 17px;
+      color: rgba(200, 212, 240, 0.6);
+      padding: 5px 0;
+      border-bottom: 1px dotted rgba(var(--gold-rgb), 0.1);
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .toc ol li::before {
+      content: counter(toc, upper-roman);
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--gold-dim);
+      min-width: 24px;
+    }
+
+    .toc ol li a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc ol li a:hover {
+      color: var(--gold);
+    }
+
+    /* ─── TECHNISCHE CODE BLOK ─── */
+    .tech-block {
+      border: 1px solid rgba(var(--aqua-rgb), 0.15);
+      border-radius: 2px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      background: rgba(var(--aqua-rgb), 0.03);
+    }
+
+    .tech-block-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--aqua);
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+
+    /* ─── LIVE LINK ─── */
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid rgba(var(--gold-rgb), 0.3);
+      padding: 10px 20px;
+      border-radius: 1px;
+      transition: all 0.25s ease;
+      margin: 16px 0;
+    }
+
+    .doc-link:hover {
+      background: rgba(var(--gold-rgb), 0.1);
+      border-color: var(--gold);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Sterrenveld -->
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<!-- Navigatie -->
+<nav class="site-nav" aria-label="Hoofdnavigatie">
+  <a href="index.html" class="nav-link">Het Dagboek</a>
+  <a href="documentatie.html" class="nav-link">DP11: Tussenrapport</a>
+  <a href="documentatie2.html" class="nav-link actief" aria-current="page">DP12: Eindoplevering</a>
+</nav>
+
+<!-- Documentatie inhoud -->
+<div class="doc-container">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div class="doc-header-deco">DP12 — Eindoplevering Project Individueel</div>
+    <h1>Jiminy's Dagboek<em>Eindoplevering</em></h1>
+    <div class="header-rule"></div>
+    <p>Een interactieve website die de moreel zwaarste momenten uit de Kingdom Hearts-reeks analyseert vanuit het perspectief van Jiminy Cricket — het geweten van het verhaal.</p>
+  </div>
+
+  <!-- Inhoudsopgave -->
+  <nav class="toc" aria-label="Inhoudsopgave">
+    <div class="toc-title">Inhoudsopgave</div>
+    <ol>
+      <li><a href="#inleiding">Inleiding</a></li>
+      <li><a href="#sfeer">Sfeer en Stijl</a></li>
+      <li><a href="#kleur">Kleurpalet</a></li>
+      <li><a href="#typografie">Typografie</a></li>
+      <li><a href="#interactie">Interactiepatroon</a></li>
+      <li><a href="#doelgroep">Doelgroepanalyse</a></li>
+      <li><a href="#concept">Concept & Ontwerp</a></li>
+      <li><a href="#ar">AR-Component</a></li>
+      <li><a href="#technisch">Technische Uitwerking</a></li>
+      <li><a href="#reflectie">Reflectie op Leerproces</a></li>
+      <li><a href="#ethiek">Ethische Onderbouwing</a></li>
+      <li><a href="#matrix">Beoordelingsmatrix</a></li>
+      <li><a href="#oplevering">Opleveringsoverzicht</a></li>
+    </ol>
+  </nav>
+
+  <!-- ── I. INLEIDING ── -->
+  <section class="doc-section" id="inleiding" aria-labelledby="titel-inleiding">
+    <div class="doc-section-title">Deel I</div>
+    <h2 id="titel-inleiding">Inleiding</h2>
+    <p>Dit document beschrijft de analyse-, ontwerp- en realisatiefase van het AR-project Jiminy's Dagboek. Het is opgesteld als eindoplevering voor Datapunt 12 (DP12) van Cyclus 5 — Project Individueel.</p>
+    <p>Het project is een interactieve website die de zwaarste morele momenten uit de Kingdom Hearts-reeks analyseert vanuit het perspectief van Jiminy Cricket — Japie Krekel — als geweten van het verhaal. De website is gepubliceerd via GitHub Pages en bevat een tijdlijnstructuur met filterfuncties, accordion-entries en een AR-component op basis van HIRO-markerherkenning.</p>
+
+    <h3>Dit document bevat</h3>
+    <ul>
+      <li>Een analyse van sfeer, visuele taal en doelgroep (DP11-inhoud)</li>
+      <li>Een onderbouwing van de technische uitwerking en het AR-concept</li>
+      <li>Een reflectie op leerproces, ontvangen feedback en iteraties</li>
+      <li>Een ethische onderbouwing met het morele stappenplan</li>
+    </ul>
+
+    <a href="https://jayheshya.github.io/Jiminy-s-Dagboek/" class="doc-link" target="_blank" rel="noopener">
+      ↗ Live website bekijken
+    </a>
+  </section>
+
+  <!-- ── II. SFEER EN STIJL ── -->
+  <section class="doc-section" id="sfeer" aria-labelledby="titel-sfeer">
+    <div class="doc-section-title">Deel II — Analysefase</div>
+    <h2 id="titel-sfeer">Sfeer en Stijl</h2>
+    <p>Het ontwerp bevindt zich als het ware tussen twee werelden: de duisternis en het mysterie van de nacht, en het warme licht van een kaarsje. Elke keuze — kleur, lettertype, animatie — is een uitdrukking van die spanning.</p>
+    <p>Het ontwerp put uit drie bronnen.</p>
+
+    <h3>Kingdom Hearts</h3>
+    <p>Sterrenbeelden, drijvende eilanden en sleutels als symbolen van toegang en afsluiting. Het motief van licht dat door de duisternis breekt onderstreept de voortdurende strijd tussen hoop en onderdrukking.</p>
+
+    <h3>Middeleeuwse Manuscripten</h3>
+    <p>Verluchte handschriften, marginalia en de kwetsbaarheid van kennis op papier. Jiminy's dagboek, bijgehouden in opdracht van koningin Minnie Mouse, weerspiegelt deze traditie.</p>
+
+    <h3>Nachtelijke Sterrenhemel</h3>
+    <p>Sterrenkaarten en astronomische atlassen uit de 17e eeuw. Dit versterkt het gevoel van het onkenbare ontdekken — Kingdom Hearts is een avontuur richting iets mysterieus.</p>
+  </section>
+
+  <!-- ── III. KLEURPALET ── -->
+  <section class="doc-section" id="kleur" aria-labelledby="titel-kleur">
+    <div class="doc-section-title">Analysefase — Visuele Taal</div>
+    <h2 id="titel-kleur">Kleurpalet</h2>
+    <p>Het palet is opgebouwd rond diepdonkere marineblauw-zwarten als basis, met goud als enige lichtbron. Paarse accenten verwijzen naar de Heartless en de schuilende duisternis. Perkamentkleur verschijnt wanneer het dagboek zelf aan het woord is.</p>
+
+    <table class="doc-table" aria-label="Kleurpalet overzicht">
+      <tr>
+        <th>Naam</th>
+        <th>Hex</th>
+        <th>Rol</th>
+      </tr>
+      <tr>
+        <td>Night</td>
+        <td>#0a0c14</td>
+        <td>Achtergrond — de diepste nacht</td>
+      </tr>
+      <tr>
+        <td>Midnight</td>
+        <td>#141828</td>
+        <td>Secties en kaders</td>
+      </tr>
+      <tr>
+        <td>Deep</td>
+        <td>#0f1220</td>
+        <td>Tussentoon — diepte</td>
+      </tr>
+      <tr>
+        <td>Gold</td>
+        <td>#c8973a</td>
+        <td>Primair accent — de enige lichtbron</td>
+      </tr>
+      <tr>
+        <td>Gold Dim</td>
+        <td>#8a6520</td>
+        <td>Gedempte labels en subtiele accenten</td>
+      </tr>
+      <tr>
+        <td>Heartless</td>
+        <td>#3d1f5e</td>
+        <td>Paarse gloed — de Heartless, schuilend duister</td>
+      </tr>
+      <tr>
+        <td>Violet</td>
+        <td>#a07cc8</td>
+        <td>Tags: verraad &amp; duisternis</td>
+      </tr>
+      <tr>
+        <td>Parchment</td>
+        <td>#f5ead0</td>
+        <td>Perkament — wanneer het dagboek spreekt</td>
+      </tr>
+      <tr>
+        <td>Parchment Shadow</td>
+        <td>#c9b48a</td>
+        <td>Dagboektekst — verouderd papier</td>
+      </tr>
+      <tr>
+        <td>Starlight</td>
+        <td>#c8d4f0</td>
+        <td>Bodytekst — sterrenlicht</td>
+      </tr>
+      <tr>
+        <td>Aqua</td>
+        <td>#5bc8d8</td>
+        <td>Tags: identiteit &amp; herinnering</td>
+      </tr>
+      <tr>
+        <td>Moreel Gewicht</td>
+        <td>Verloop</td>
+        <td>Koud → warm: licht naar duisternis</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ── IV. TYPOGRAFIE ── -->
+  <section class="doc-section" id="typografie" aria-labelledby="titel-type">
+    <div class="doc-section-title">Analysefase — Visuele Taal</div>
+    <h2 id="titel-type">Typografie</h2>
+    <p>Drie lettertypen vullen elk hun eigen rol in het verhaal.</p>
+
+    <div style="border: 1px solid rgba(200,151,58,0.15); border-radius: 2px; padding: 24px 28px; margin: 16px 0; background: rgba(255,255,255,0.02);">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px;">Cinzel — Titels en labels</div>
+      <div style="font-family:'Cinzel',serif;font-size:28px;color:var(--parchment);letter-spacing:2px;">Jiminy's Dagboek</div>
+      <p style="margin-top:10px;font-size:15px;">Romeins, monumentaal en tijdloos. Het gevoel van een inscriptie op steen. Gebruikt voor alle navigatie, knoppen en koppen.</p>
+    </div>
+
+    <div style="border: 1px solid rgba(200,151,58,0.15); border-radius: 2px; padding: 24px 28px; margin: 16px 0; background: rgba(255,255,255,0.02);">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px;">IM Fell English — Jiminy's stem</div>
+      <div style="font-family:'IM Fell English',serif;font-style:italic;font-size:24px;color:var(--parchment-shadow);line-height:1.5;">"Hij deed het zonder aarzelen. Dreef het zwaard in zijn eigen borst om de harten binnenin te bevrijden."</div>
+      <p style="margin-top:10px;font-size:15px;">Een 17e-eeuws schreeflettertype met karakter en imperfectie. Persoonlijk, literair, een tikje melancholisch. De stem van het dagboek zelf.</p>
+    </div>
+
+    <div style="border: 1px solid rgba(200,151,58,0.15); border-radius: 2px; padding: 24px 28px; margin: 16px 0; background: rgba(255,255,255,0.02);">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px;">Crimson Pro — Analyseteksten</div>
+      <div style="font-family:'Crimson Pro',Georgia,serif;font-size:18px;color:rgba(200,212,240,0.75);line-height:1.7;">De daad is een diepgaande omkering van het doel van de Keyblade. Het instrument van verovering dat tegen zijn eigen drager wordt gekeerd voor de bevrijding van anderen.</div>
+      <p style="margin-top:10px;font-size:15px;">Leesbaar en elegant. Zakelijker dan IM Fell, maar nog steeds warm. Gebruikt voor de morele analyses.</p>
+    </div>
+  </section>
+
+  <!-- ── V. INTERACTIEPATROON ── -->
+  <section class="doc-section" id="interactie" aria-labelledby="titel-interactie">
+    <div class="doc-section-title">Analysefase</div>
+    <h2 id="titel-interactie">Interactiepatroon</h2>
+    <p>De accordion-structuur is bewust gekozen. Een dagboek open je pagina voor pagina. De vorige pagina sluit als de volgende opent. In dit digitale dagboek sluit een entry wanneer een andere wordt geopend — het is onmogelijk twee entries tegelijkertijd te lezen.</p>
+    <p>Iedere entry bevat een beschrijving van het verhaalmoment en een morele analyse van Jiminy zelf.</p>
+
+    <h3>Morele Gewichtsschaal</h3>
+    <p>De morele-gewichtsbalk is een visuele metafoor: hoe zwaarder de keuze, hoe verder de balk reikt van koud blauw naar warm rood.</p>
+    <ul>
+      <li>Koud blauw: rationele, afstandelijke keuze</li>
+      <li>Paars: morele ambiguïteit en innerlijk conflict</li>
+      <li>Warm rood: emotioneel zware of moreel problematische keuze</li>
+    </ul>
+
+    <div style="border:1px solid rgba(200,151,58,0.15);border-radius:2px;padding:24px 28px;margin:16px 0;background:rgba(255,255,255,0.02);">
+      <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px;">Morele gewichtsschaal — voorbeeld</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+        <span style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);text-transform:uppercase;white-space:nowrap;">Moreel gewicht</span>
+        <div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;width:72%;background:linear-gradient(90deg,#3d6b8a,#a070c8,#c87070);border-radius:2px;"></div>
+        </div>
+        <span style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);">72</span>
+      </div>
+      <p style="margin-top:12px;font-size:15px;">De balk loopt van #3d6b8a via #a070c8 naar #c87070. Elke entry heeft een eigen waarde (0–100) die de morele complexiteit van dat moment weergeeft.</p>
+    </div>
+
+    <h3>Filterfunctie</h3>
+    <p>Bezoekers kunnen entries filteren op moreel thema: opoffering, keuze, identiteit, herinnering, verraad en duisternis. De filter is bedoeld voor de secundaire doelgroep — thematisch navigeren zonder de volledige Kingdom Hearts-lore te kennen moet mogelijk zijn.</p>
+  </section>
+
+  <!-- ── VI. DOELGROEP ── -->
+  <section class="doc-section" id="doelgroep" aria-labelledby="titel-doelgroep">
+    <div class="doc-section-title">Deel II — Analysefase</div>
+    <h2 id="titel-doelgroep">Doelgroepanalyse</h2>
+
+    <h3>Primaire doelgroep: Kingdom Hearts-fans (16–28 jaar)</h3>
+    <p>Dit zijn spelers die de reeks kennen en er emotioneel bij betrokken zijn. Ze zijn opgegroeid met de games of hebben ze later ontdekt. Wat hen bindt is niet zozeer de actie, maar de verhaaldiepte. Thema's van identiteit, vriendschap en verlies raken hen persoonlijk. Kingdom Hearts-fans zijn gewend aan complexe lore en waarderen inhoud die de verhalen serieus neemt.</p>
+
+    <table class="doc-table" aria-label="Doelgroep Kingdom Hearts-fans">
+      <tr><th>Aspect</th><th>Omschrijving</th></tr>
+      <tr><td>Doelgroep</td><td>Kingdom Hearts-fans, 16–28 jaar</td></tr>
+      <tr><td>Behoeften</td><td>Herkenning, diepgang, nieuwe invalshoek op verhalen die ze al kennen</td></tr>
+      <tr><td>Gedrag</td><td>Lezen wikis, kijken lore-video's op YouTube, volgen fanaccounts, gewend aan rijke gelaagde interfaces</td></tr>
+    </table>
+
+    <h3>Secundaire doelgroep: Geïnteresseerden in narratieve ethiek (18–35 jaar)</h3>
+    <p>Mensen die niet per se de games kennen. Ze worden aangetrokken door de filosofische insteek. De vragen die de website stelt — over opoffering, identiteit, bestaansrecht — zijn universeel en bieden veel ruimte voor discussie.</p>
+
+    <table class="doc-table" aria-label="Doelgroep narratieve ethiek">
+      <tr><th>Aspect</th><th>Omschrijving</th></tr>
+      <tr><td>Doelgroep</td><td>Geïnteresseerden in narratieve ethiek, 18–35 jaar</td></tr>
+      <tr><td>Behoeften</td><td>Toegankelijkheid, context, intellectuele uitdaging</td></tr>
+      <tr><td>Gedrag</td><td>Lezen longform, waarderen redenering en onderbouwing</td></tr>
+    </table>
+
+    <h3>Ontwerpimplicaties</h3>
+    <ul>
+      <li>Filterfunctie is essentieel voor de secundaire doelgroep — thematisch navigeren zonder de volledige Kingdom Hearts-lore te kennen moet mogelijk zijn.</li>
+      <li>Accordion voorkomt overweldiging — beide doelgroepen bepalen zelf het tempo.</li>
+      <li>Mobiele leesbaarheid is cruciaal: grote lettertypes, voldoende witruimte, knoppen groot genoeg om aan te raken.</li>
+    </ul>
+  </section>
+
+  <!-- ── VII. CONCEPT ── -->
+  <section class="doc-section" id="concept" aria-labelledby="titel-concept">
+    <div class="doc-section-title">Deel III — Ontwerpfase</div>
+    <h2 id="titel-concept">Concept & Ontwerp</h2>
+
+    <h3>Kernconcept</h3>
+    <p>Kingdom Hearts wordt vaak omschreven als een verhaal over vriendschap en licht tegen duisternis. Het is ook een reeks die keer op keer diepe morele vragen stelt zonder ze te beantwoorden. Jiminy's Dagboek neemt die vragen serieus en presenteert de moreel zwaarste momenten als ethische casussen.</p>
+
+    <div class="doc-quote">
+      "Wat als je de grootste morele momenten uit een videogame behandelt als filosofische teksten die bewaard moeten worden?"
+    </div>
+
+    <h3>Waarom Jiminy Cricket?</h3>
+    <p>Jiminy is de perfecte verteller. Hij is klein, staat altijd aan de zijlijn en heeft geen macht. Zijn rol in de Disney-mythologie — het geweten in Pinokkio — maakt hem tot de ideale morele getuige die commentaar geeft op jouw keuzes.</p>
+    <p>In de Kingdom Hearts-games krijgt Jiminy Cricket een missie van koningin Minnie Mouse om het verhaal van Sora op te schrijven. Daarnaast fungeert hij als het morele kompas van hoofdpersoon Sora. De acht punten met het zwaarste morele gewicht staan op dit moment live op de website.</p>
+
+    <h3>Originaliteit</h3>
+    <p>De meeste Kingdom Hearts-fansites zijn encyclopedisch of nostalgisch. Dit project kiest een andere insteek: analytisch én emotioneel. Het dagboek-metafoor structureert de gehele gebruikservaring — van de accordion die je pagina voor pagina opent, tot de morele-gewichtsbalk die een subjectief oordeel visualiseert.</p>
+
+    <h3>Aansluiting bij de opdracht</h3>
+    <p>Het concept is consistent uitgewerkt van visueel tot inhoudelijk. Typografie, kleurpalet, interactiepatronen en teksten vertellen allemaal hetzelfde verhaal. Er is één helder uitgangspunt dat de gehele website aanstuurt.</p>
+  </section>
+
+  <!-- ── VIII. AR-COMPONENT ── -->
+  <section class="doc-section" id="ar" aria-labelledby="titel-ar">
+    <div class="doc-section-title">Deel IV — AR &amp; Innovatie</div>
+    <h2 id="titel-ar">AR-Component</h2>
+
+    <h3>Concept</h3>
+    <div class="ar-highlight">
+      <p>De volledig gerealiseerde versie van de website komt met een fysiek dagboek, gevuld met scanbare HIRO-markers. Het scannen van een marker neemt de gebruiker mee door een casus die Jiminy heeft opgeschreven. Verteld door Jiminy zelf die als het ware uit het boek springt.</p>
+    </div>
+
+    <p>De AR-ervaring werkt in drie stappen.</p>
+    <ul>
+      <li>Context: Jiminy verschijnt en legt de morele context van de casus uit.</li>
+      <li>Keuze: de gebruiker kiest een morele richting (goed of slecht) via scanbare markers of knoppen.</li>
+      <li>Oordeel: Jiminy reageert op de keuze met zijn morele oordeel en een portaalvisualisatie van de gevolgen.</li>
+    </ul>
+
+    <h3>Technische implementatie</h3>
+    <div class="tech-block">
+      <div class="tech-block-label">Gebruikte technologieën</div>
+      <ul>
+        <li>AR.js (versie master) voor HIRO-patroonmarkerherkenning via de webcam</li>
+        <li>A-Frame (versie 1.4.2) voor de 3D-laag boven de camerabeelden</li>
+        <li>Native camera-API als fallback; bij geen camera-toegang activeert automatisch de demo-modus</li>
+        <li>Smooth-attributen (smoothCount, smoothTolerance, smoothThreshold) voor stabiele markerdetectie zonder flicker</li>
+      </ul>
+    </div>
+    <p>De HIRO-marker is de standaardmarker van AR.js (preset: "hiro"). Gebruikers kunnen de marker afdrukken via de link op de scanpagina.</p>
+
+    <h3>Thematische integratie</h3>
+    <p>Het AR-element past functioneel én thematisch bij het concept. Het fysieke dagboek dat tot leven komt via AR versterkt de dagboek-metafoor: je bladert door het boek, Jiminy springt er letterlijk uit. De keuze voor portal-visualisaties — een gouden cirkel voor de goede keuze, een duistere voor de slechte — sluit aan bij de visuele taal van de website.</p>
+  </section>
+
+  <!-- ── IX. TECHNISCHE UITWERKING ── -->
+  <section class="doc-section" id="technisch" aria-labelledby="titel-tech">
+    <div class="doc-section-title">Deel V — Realiseren</div>
+    <h2 id="titel-tech">Technische Uitwerking</h2>
+
+    <h3>Responsieve flow</h3>
+    <p>De website is volledig responsief opgeleverd. De tijdlijn, filterbalk en accordion-entries schalen correct op alle schermformaten. Op mobiel zijn knoppen minimaal 44×44 px groot voor voldoende tapzone. De CSS maakt gebruik van <code style="font-family:monospace;font-size:14px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:2px;">clamp()</code> voor vloeiende typografische schaling.</p>
+
+    <h3>Interacties en animaties</h3>
+    <ul>
+      <li>Accordion-entries openen en sluiten met een max-height overgang (cubic-bezier).</li>
+      <li>Morele-gewichtsbalk animeert bij openen van een entry via CSS transition.</li>
+      <li>Sterrenveld-achtergrond gegenereerd via JavaScript (160 sterren, elk met individuele twinkle-animatie).</li>
+      <li>Scroll-reveal via IntersectionObserver: entries faden in bij scrollen.</li>
+      <li>Filterknoppen filteren entries live zonder pagina-herlaad.</li>
+      <li>HIRO-marker trigger activeert portaalanimatie met deeltjeseffect.</li>
+    </ul>
+
+    <h3>Codekwaliteit en structuur</h3>
+    <p>De code is georganiseerd in drie bestanden.</p>
+    <div class="tech-block">
+      <div class="tech-block-label">Bestandsstructuur</div>
+      <ul>
+        <li><strong style="color:var(--parchment);">index.html</strong> — de tijdlijnpagina met alle entry-data als JavaScript-object</li>
+        <li><strong style="color:var(--parchment);">ar.html</strong> — de AR-ervaringspagina, opgebouwd vanuit URL-parameters (?entry=)</li>
+        <li><strong style="color:var(--parchment);">stijl.css</strong> — gedeeld stylesheet met CSS-variabelen voor thema-kleuren</li>
+      </ul>
+    </div>
+    <p>CSS-variabelen zorgen voor consistentie: alle kleuren, breedtes en z-index-waarden zijn centraal gedefinieerd in <code style="font-family:monospace;font-size:14px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:2px;">:root</code>.</p>
+  </section>
+
+  <!-- ── X. REFLECTIE ── -->
+  <section class="doc-section" id="reflectie" aria-labelledby="titel-reflectie">
+    <div class="doc-section-title">Deel VI — Reflectie &amp; Onderbouwing</div>
+    <h2 id="titel-reflectie">Reflectie op Leerproces</h2>
+
+    <h3>Integratie van feedback (DP11)</h3>
+    <p>Uit de peer feedback van DP11 kwamen de volgende verbeterpunten naar voren:</p>
+    <ul>
+      <li>Visuele consistentie in het UI-ontwerp (Sufiyan): het Figma high-fidelity ontwerp kon op onderdelen wat detailleerder en consistenter worden uitgewerkt. Spacing, uitlijning en hergebruik van componenten waren niet overal gelijk.</li>
+    </ul>
+    <p>Deze punten zijn als volgt verwerkt in het eindproduct:</p>
+    <ul>
+      <li>De UI-consistentie is verbeterd door een strikter gebruik van de CSS-variabelen uit stijl.css. Alle spacing-waarden zijn teruggebracht tot een vaste schaal (4px-grid), knoppen en tags gebruiken overal dezelfde padding-waarden, en herhalende componenten zoals de entry-headers zijn opgeschoond tot één herbruikbare structuur.</li>
+      <li>Het onderzoek naar stijl, doelgroep en sfeer is in dit eindverslag uitgebreider gedocumenteerd. De sfeeranalyse benoemt nu expliciet de drie visuele bronnen en koppelt elke ontwerpkeuze terug aan die bronnen.</li>
+    </ul>
+
+    <h3>Iteraties</h3>
+    <p>De iteraties zijn onder te verdelen in vier fasen.</p>
+
+    <div class="fase-block">
+      <div class="fase-label">Fase 1</div>
+      <div class="fase-title">Visuele basis en eerste inhoud</div>
+      <p style="font-size:16px;color:rgba(200,212,240,0.7);line-height:1.7;margin:0;">De eerste commits richtten zich op de visuele identiteit van het project. Kleuren aangepast voor leesbaarheid. Dit was een vroeg signaal dat het donkere palet in de praktijk problemen gaf met contrast. Het tussenrapport werd aan de site toegevoegd als documentatiepagina, wat de informatiearchitectuur van het project direct vastlegde.</p>
+    </div>
+
+    <div class="fase-block">
+      <div class="fase-label">Fase 2</div>
+      <div class="fase-title">AR-experiment en audio</div>
+      <p style="font-size:16px;color:rgba(200,212,240,0.7);line-height:1.7;margin:0;">Na de basisopzet werd het AR-experiment toegevoegd. Parallel daaraan is gewerkt aan het audiosysteem: eerst de achtergrondmuziek, daarna specifieke audio triggers en ten slotte de audio voor het Sora Hart-moment. Dit iteratieve opbouwen van het geluidssysteem laat zien dat audio niet van tevoren volledig was uitgedacht maar gaandeweg vorm kreeg.</p>
+    </div>
+
+    <div class="fase-block">
+      <div class="fase-label">Fase 3 — de langste iteratie</div>
+      <div class="fase-title">Camera bug fixes</div>
+      <p style="font-size:16px;color:rgba(200,212,240,0.7);line-height:1.7;margin:0;">De commitgeschiedenis laat acht opeenvolgende camera bug fixes zien. Dit is de meest intensieve iteratiefase van het project. De camera-integratie voor de AR-functionaliteit bleek technisch complex: AR.js beheert zijn eigen camera-stream en conflicteerde met de eigen getUserMedia-aanroep in de code. Elk fix-commit vertegenwoordigt een poging om het conflict op te lossen, tot uiteindelijk de oplossing gevonden werd in het scheiden van de twee streams.</p>
+    </div>
+
+    <div class="fase-block">
+      <div class="fase-label">Fase 4</div>
+      <div class="fase-title">Oplevering en structuurverbetering</div>
+      <p style="font-size:16px;color:rgba(200,212,240,0.7);line-height:1.7;margin:0;">In de laatste fase werd de codestructuur verbeterd zodat media correct wordt opgehaald, en werd de volgorde van triggers in ar.html gecorrigeerd. Deze commits laten zien dat er ook na het oplossen van de camera-bug nog aandacht was voor correctheid en robuustheid van de code, niet alleen voor werkende functionaliteit.</p>
+    </div>
+
+    <h3>Leerproces</h3>
+    <p>Wat ik onderschat heb is hoe eigenwijs AR.js kan zijn. Het conflict tussen de eigen camera-stream en die van AR.js kostte me alleen al acht iteraties om op te lossen. Dit heeft tijd gekost die ik op veel betere manieren had kunnen gebruiken.</p>
+    <p>De demo-versie staat volledig: animaties, achtergrondmuziek en Jiminy's voice-over werken zoals bedoeld. Wat nog ontbreekt is de automatische activatie van die media-keten op het moment dat de HIRO-marker wordt gescand — de brug tussen de fysieke marker en de digitale beleving die het concept compleet maakt. Daarnaast is het plan om de AR-functie te koppelen aan een fysiek dagboek nog niet gelukt.</p>
+  </section>
+
+  <!-- ── XI. ETHISCHE ONDERBOUWING ── -->
+  <section class="doc-section" id="ethiek" aria-labelledby="titel-ethiek">
+    <div class="doc-section-title">Deel VII — Ethiek &amp; Maatschappij</div>
+    <h2 id="titel-ethiek">Ethische Onderbouwing</h2>
+    <p>Hieronder volgt de uitwerking van het morele stappenplan. Het morele dilemma is geformuleerd op basis van de inhoud van het project: het presenteren van morele keuzes uit een videogame als ethische casussen voor een publiek.</p>
+
+    <div class="dilemma-block">
+      <p>"Is het ethisch verantwoord om de morele keuzes van fictieve personages te gebruiken als ethisch lesmateriaal, wetende dat deze keuzes door de maker van de game zijn geschreven en gestuurd?"</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 1</div>
+      <h4>Feitenonderzoek</h4>
+      <p>Jiminy's Dagboek is een interactieve website die morele momenten uit de Kingdom Hearts-reeks presenteert als ethische casussen. De website is gemaakt door een ICT-student als individueel AR-project. De inhoud is gebaseerd op scènes uit een commerciële videogame, ontwikkeld door Square Enix en Disney. De keuzes die personages in het spel maken zijn geschreven door scenarioschrijvers en vastgelegd in de gamecode.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 2</div>
+      <h4>Probleemidentificatie</h4>
+      <p>Het morele dilemma is: is het ethisch verantwoord om de keuzes van fictieve personages te gebruiken als serieus ethisch lesmateriaal, wetende dat die keuzes door een scenarioschrijver zijn ontworpen en nooit echt vrij waren? Het probleem zit in de schijn van authenticiteit. Bezoekers kunnen ten onrechte denken dat ze iets leren over echte morele afwegingen, terwijl zij reageren op een verhaal dat al een uitkomst had.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 3</div>
+      <h4>Betrokkenen</h4>
+      <p>De directe betrokkenen zijn: de maker van de website (Joshua Arends), de bezoekers van de website, en indirect Square Enix en Disney als eigenaren van de intellectuele eigendomsrechten. Daarnaast zijn de fictieve personages zelf betrokken in symbolische zin, en is de bredere Kingdom Hearts-fancommunity een indirecte betrokkene wiens gedeelde interpretaties kunnen worden beïnvloed door de morele framing op de website.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 4</div>
+      <h4>Waarden en normen</h4>
+      <ul>
+        <li>Eerlijkheid: bezoekers verdienen transparantie over de aard van de casussen — fictieve, gescripte momenten, geen vrije menselijke keuzes.</li>
+        <li>Autonomie: bezoekers moeten zelf kunnen oordelen zonder dat de interface hen onbewust naar een bepaalde morele conclusie stuurt.</li>
+        <li>Respect: de personages en het verhaal worden serieus genomen, maar er wordt ook een oordeel over hen geveld dat niet door de oorspronkelijke makers is bedoeld.</li>
+      </ul>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 5</div>
+      <h4>Opties</h4>
+      <p><strong style="color:var(--parchment);">Optie A:</strong> De website presenteert de fictieve keuzes als ethische casussen zonder expliciete disclaimer, en vertrouwt erop dat bezoekers zelf begrijpen dat het om fictie gaat.</p>
+      <p><strong style="color:var(--parchment);">Optie B:</strong> De website presenteert de fictieve keuzes als ethische casussen mét een expliciete toelichting dat het om geconstrueerde narratieve momenten gaat, en nodigt bezoekers uit om zelf een moreel oordeel te vormen.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 6</div>
+      <h4>Gevolgen per optie</h4>
+      <p>Bij optie A kunnen bezoekers mogelijk een verkeerd beeld krijgen van hoe morele afwegingen in het echte leven werken. De website komt sterker over als beleving, maar zwakker als educatief instrument. Bij optie B krijgen bezoekers meer ruimte voor eigen interpretatie, wat de educatieve waarde vergroot, maar de emotionele impact kan verminderen als de fictieve aard te nadrukkelijk wordt benadrukt.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 7</div>
+      <h4>Ethische theorieën</h4>
+      <ul>
+        <li><strong style="color:var(--parchment);">Consequentialisme:</strong> Optie B is de voorkeur. Als het doel is dat bezoekers iets leren over morele afwegingen, leidt meer transparantie tot betere leeruitkomsten voor meer mensen.</li>
+        <li><strong style="color:var(--parchment);">Deontologie (Kant):</strong> Handel alleen volgens een principe dat je zou willen dat iedereen toepast. Als elke website fictieve verhalen als feitelijk ethisch lesmateriaal presenteert zonder disclaimer, ondermijnt dat collectief het kritisch denkvermogen van het publiek. Optie B is in lijn met het principe van eerlijkheid als universele norm.</li>
+        <li><strong style="color:var(--parchment);">Deugdethiek:</strong> Jiminy Cricket is zelf een symbool van geweten en eerlijkheid. Het zou inconsistent zijn als de website die hij bevolkt oneerlijk is tegenover haar eigen publiek. Optie B past bij het karakter van de website.</li>
+      </ul>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 8</div>
+      <h4>Moreel oordeel</h4>
+      <p>Het is ethisch verantwoord om fictieve keuzes als ethisch lesmateriaal te gebruiken, mits de website transparant is over de aard van de casussen. Optie B verdient de voorkeur. Fictie is een erkend en waardevol middel om morele vragen te verkennen — literatuur, film en theater doen dit al eeuwen. Het probleem zit niet in het gebruik van fictie, maar in het weglaten van de context die de bezoeker nodig heeft om er kritisch mee om te gaan.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 9</div>
+      <h4>Kritische reflectie</h4>
+      <p>Een kritische kanttekening is dat ik (Joshua Arends) persoonlijk Kingdom Hearts-fan ben. Dit maakt het moeilijk om volledig neutraal te zijn in de keuze welke momenten moreel zwaar zijn. De selectie van acht casussen is subjectief en weerspiegelt mijn eigen morele kompas. Bovendien wekt de morele-gewichtsschaal (0–100) de schijn van objectiviteit — dit is uiteraard een volledig subjectieve inschatting.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 10</div>
+      <h4>Maatschappelijke implicaties</h4>
+      <p>Op maatschappelijk niveau raakt dit dilemma aan een bredere vraag over de rol van populaire cultuur in morele educatie. Steeds meer ethiekonderwijs gebruikt fictieve casussen — van trolley-problemen tot Breaking Bad. Jiminy's Dagboek past in die traditie. Een risico is dat de website, door Kingdom Hearts te gebruiken, alleen toegankelijk is voor mensen die de games kennen. Daarnaast is er een duurzaamheidsvraag: de website is visueel zwaar en draait op animaties die op oudere apparaten slecht presteren.</p>
+    </div>
+
+    <div class="ethics-step">
+      <div class="ethics-step-num">Stap 11</div>
+      <h4>Conclusie</h4>
+      <p>Het morele oordeel is dat het gebruik van fictieve keuzes als ethisch lesmateriaal verantwoord is, mits de website transparant is over de geconstrueerde aard van de casussen en de bezoeker actief uitnodigt tot eigen oordeel in plaats van bevestiging.</p>
+      <p>Dit heeft geleid tot twee concrete keuzes in het eindproduct: ten eerste is de morele-gewichtsschaal in de documentatie expliciet omschreven als een subjectieve inschatting. Ten tweede is in de analyse-teksten van de entries de stem van Jiminy bewust gescheiden van een analytische laag.</p>
+      <p>Wat nog ontbreekt als verbeterpunt: een korte introductietekst op de website die bezoekers bewust maakt van het feit dat de casussen gebaseerd zijn op fictie, en dat de morele oordelen de interpretatie zijn van de maker en niet de enige geldige lezing.</p>
+    </div>
+  </section>
+
+  <!-- ── XII. BEOORDELINGSMATRIX ── -->
+  <section class="doc-section" id="matrix" aria-labelledby="titel-matrix">
+    <div class="doc-section-title">Bijlage</div>
+    <h2 id="titel-matrix">Beoordelingsmatrix</h2>
+
+    <div class="matrix-item">
+      <div class="matrix-criterium">Analyseren — Integratie van feedback</div>
+      <div class="matrix-text">Feedback uit DP11 is verwerkt via strikter gebruik van CSS-variabelen en een 4px-grid voor spacing. De sfeeranalyse benoemt nu expliciet drie visuele bronnen en koppelt elke ontwerpkeuze terug aan die bronnen.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Ontwerpen — Integratie van feedback</div>
+      <div class="matrix-text">UI-consistentie verbeterd door hergebruik van componenten en gestandaardiseerde padding-waarden. Entry-headers zijn opgeschoond tot één herbruikbare structuur.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Realiseren — Technische uitwerking</div>
+      <div class="matrix-text">Volledig responsieve website, interacties en animaties geïmplementeerd, code georganiseerd in drie bestanden met gedeelde CSS-variabelen.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Realiseren — Innovatie &amp; AR-component</div>
+      <div class="matrix-text">AR-functionaliteit gebouwd met AR.js en A-Frame. Demo-modus als fallback. Portaalanimatie met deeltjeseffect. Thematisch geïntegreerd in het dagboek-concept.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Adviseren — Presentatievorm</div>
+      <div class="matrix-text">Website gepubliceerd via GitHub Pages. Documentatiepagina's voor DP11 en DP12 toegevoegd als onderdeel van de informatiearchitectuur.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Manage &amp; Control — Portfolio</div>
+      <div class="matrix-text">Iteraties gedocumenteerd in vier fasen. Reflectie op leerproces, ontvangen feedback en technische obstakels zijn inzichtelijk gemaakt.</div>
+    </div>
+    <div class="matrix-item">
+      <div class="matrix-criterium">Adviseren — Ethiek</div>
+      <div class="matrix-text">Moreel stappenplan volledig uitgewerkt. Ethische keuzes zijn doorvertaald naar concrete ontwerpbeslissingen in het eindproduct.</div>
+    </div>
+  </section>
+
+  <!-- ── XIII. OPLEVERINGSOVERZICHT ── -->
+  <section class="doc-section" id="oplevering" aria-labelledby="titel-oplevering">
+    <div class="doc-section-title">Bijlage</div>
+    <h2 id="titel-oplevering">Opleveringsoverzicht</h2>
+    <p>De volgende bestanden worden ingeleverd als eindoplevering voor DP12.</p>
+
+    <table class="doc-table" aria-label="Opleveringsoverzicht">
+      <tr>
+        <th>Item</th>
+        <th>Formaat</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td>Ontwerpdocumenten</td>
+        <td>PDF</td>
+        <td><span class="status-badge status-ingeleverd">Ingeleverd</span></td>
+      </tr>
+      <tr>
+        <td>Ontwikkelpunt reflectie</td>
+        <td>PDF</td>
+        <td><span class="status-badge status-ingeleverd">Ingeleverd</span></td>
+      </tr>
+      <tr>
+        <td>Figma-prototype</td>
+        <td>Figma-link</td>
+        <td><span class="status-badge status-ingeleverd">Ingeleverd</span></td>
+      </tr>
+      <tr>
+        <td>index.html + ar.html + stijl.css</td>
+        <td>HTML/CSS</td>
+        <td><span class="status-badge status-ingeleverd">Ingeleverd</span></td>
+      </tr>
+      <tr>
+        <td>Creatieve presentatie</td>
+        <td>Video / demo / pitch</td>
+        <td><span class="status-badge status-pending">Pending</span></td>
+      </tr>
+      <tr>
+        <td>Ethisch stappenplan</td>
+        <td>PDF</td>
+        <td><span class="status-badge status-ingeleverd">Ingeleverd</span></td>
+      </tr>
+    </table>
+  </section>
+
+</div>
+
+<div class="scroll-bottom" aria-hidden="true">· · ✦ · ·</div>
+
+<footer>
+  <p class="footer-text">
+    DP12 — Eindoplevering Project Individueel · Jiminy's Dagboek
+  </p>
+</footer>
+
+<script>
+  // ─── STERRENVELD ───
+  const starsEl = document.getElementById('stars');
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < 160; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    star.style.cssText = [
+      `left: ${Math.random() * 100}%`,
+      `top: ${Math.random() * 100}%`,
+      `width: ${size}px`,
+      `height: ${size}px`,
+      `--d: ${(Math.random() * 4 + 2).toFixed(1)}s`,
+      `--delay: ${(Math.random() * 6).toFixed(1)}s`,
+      `--min: ${(Math.random() * 0.15 + 0.03).toFixed(2)}`,
+      `--max: ${(Math.random() * 0.6 + 0.2).toFixed(2)}`,
+    ].join(';');
+    fragment.appendChild(star);
+  }
+  starsEl.appendChild(fragment);
+
+  // ─── SCROLL REVEAL ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 100);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.doc-section').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
